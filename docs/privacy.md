@@ -22,4 +22,4 @@ Staged mode works before the first commit. History mode rejects an empty history
 
 Tests use synthetic forbidden strings only. A passing denylist scan cannot prove that arbitrary unknown or obfuscated personal information is absent. Review every proposed filename and inspect all copied material manually. Run the staged scan before the first commit, then rerun history and worktree scans against the exact tested revision before any remote push or invitation.
 
-The project is private and unlicensed. GitHub visibility, publication and collaborator access are separate actions after the local privacy report has been reviewed. Do not claim access based on an invitation request; verify pending invitation or accepted write permission explicitly.
+The project is unlicensed. Public repository visibility does not grant an open-source license. GitHub visibility, publication and collaborator access are separate actions after the local privacy report has been reviewed. Do not claim write access based on an invitation request; verify pending invitation or accepted write permission explicitly.
