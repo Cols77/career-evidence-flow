@@ -22,7 +22,7 @@ cv = "cv_toolkit.cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-cv_toolkit = ["assets/*.css", "assets/*.html", "assets/examples/*/*", "assets/skills/*/*.md", "assets/skills/*/references/*.md", "assets/skills/*/references/*/*.md"]
+cv_toolkit = ["assets/*.css", "assets/*.html", "assets/examples/*/*", "assets/hook/*", "assets/skills/*/*.md", "assets/skills/*/references/*.md", "assets/skills/*/references/*/*.md"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

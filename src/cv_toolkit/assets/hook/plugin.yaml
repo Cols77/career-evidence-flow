@@ -1,0 +1,6 @@
+name: resume-toolkit
+version: 0.1.0
+description: State-aware entry workflow route for the resume toolkit (setup, capture, application, repair)
+provided_by: resume-toolkit
+provides_hooks:
+  - pre_llm_call

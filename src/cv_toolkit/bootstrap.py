@@ -67,3 +67,57 @@ def _skill_resources(source, target):
             yield from _skill_resources(resource, destination)
         elif resource.is_file():
             yield destination, resource.read_bytes()
+
+
+HOOK_NAME = 'resume-toolkit'
+
+# cv_toolkit dependency modules the classifier imports.   Bundled verbatim next
+# to onboarding.py so the installed Hermes plugin is self-contained and can
+# reuse the canonical validators whether or not cv_toolkit is also installed.
+_HOOK_DEPENDENCIES = ('__init__.py', 'records.py', 'evidence.py', 'projection.py', 'workspace.py')
+
+
+def _hook_resources():
+    """Return the Hermes project-plugin payload for the entry workflow hook.
+
+    ``onboarding.py`` is copied verbatim from ``cv_toolkit.onboarding`` so the
+    installed plugin can never drift from the canonical module. The manifest and
+    ``__init__.py`` are static assets. Because the classifier reuses the
+    canonical validators, the needed ``cv_toolkit`` dependency modules are
+    bundled alongside it (``cv_toolkit/*.py``); an explicitly installed
+    ``cv_toolkit`` package is an equivalent supported alternative.
+    """
+    hook_dir = files('cv_toolkit').joinpath('assets', 'hook')
+    yield 'plugin.yaml', hook_dir.joinpath('plugin.yaml').read_bytes()
+    manifest = hook_dir.joinpath('__init__.py').read_bytes()
+    yield '__init__.py', manifest
+    yield 'onboarding.py', files('cv_toolkit').joinpath('onboarding.py').read_bytes()
+    for module in _HOOK_DEPENDENCIES:
+        source = files('cv_toolkit').joinpath(module)
+        if source.is_file():
+            yield f'cv_toolkit/{module}', source.read_bytes()
+
+
+def install_entry_hook(root, host):
+    """Install the state-aware Hermes entry hook into a private workspace.
+
+    Refuses to overwrite an existing installation. Writes
+    ``<root>/.hermes/plugins/resume-toolkit/{plugin.yaml,__init__.py,onboarding.py}``.
+    The hook only loads when Hermes is launched from ``root`` with project
+    plugins enabled and ``resume-toolkit`` under ``plugins.enabled``.
+    """
+    prefix = {'hermes': '.hermes/plugins'}.get(host)
+    if prefix is None:
+        raise ToolkitError('invalid hook host')
+    root = Path(root).resolve(strict=True)
+    target = root / prefix / HOOK_NAME
+    if target.exists() or target.is_symlink():
+        raise ToolkitError('hook already installed')
+    if not target.resolve(strict=False).is_relative_to(root):
+        raise ToolkitError('hook path escapes workspace')
+    payload = list(_hook_resources())
+    for relative, raw in payload:
+        path = target / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(raw)
+    return len(payload)

@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 import tempfile
 
-from .bootstrap import init_workspace, install_skills
+from .bootstrap import init_workspace, install_skills, install_entry_hook
 from .evidence import build_source_registry, claim_index, load_evidence
 from .records import ToolkitError, confined, load_json
 from .workspace import Workspace
@@ -46,7 +46,7 @@ def _parser():
     init.add_argument('directory', type=Path)
     init.add_argument('--name', default='Candidate')
     init.add_argument('--example', choices=('developer', 'researcher'))
-    for command in ('validate-evidence', 'validate-projection', 'render', 'check', 'install-skills', 'create-application', 'status', 'answer', 'resolve-question'):
+    for command in ('onboard', 'validate-evidence', 'validate-projection', 'render', 'check', 'install-skills', 'install-hooks', 'create-application', 'status', 'answer', 'resolve-question'):
         item = sub.add_parser(command)
         item.add_argument('--workspace', type=Path, required=True)
         if command in {'validate-evidence', 'validate-projection', 'create-application', 'status', 'answer', 'resolve-question'}:
@@ -64,7 +64,7 @@ def _parser():
             item.add_argument('--document', required=True)
             item.add_argument('--kind', choices=('resume', 'cover_letter'), default='resume')
             item.add_argument('--policy', help='Workspace-relative effective policy JSON')
-        if command == 'install-skills':
+        if command in ('install-skills', 'install-hooks'):
             item.add_argument('--host', choices=('codex', 'claude', 'hermes'), required=True)
         if command == 'create-application':
             item.add_argument('--slug', required=True)
@@ -95,6 +95,15 @@ def main(argv=None):
         if args.command == 'init':
             init_workspace(args.directory, name=args.name, example=args.example)
             result['synthetic'] = args.example is not None
+        elif args.command == 'onboard':
+            from .onboarding import classify
+            state = classify(args.workspace)
+            result.update(state=state.state, skill=state.load_skill,
+                          guidance=state.as_context()['context'])
+            result['status'] = 'invalid' if state.state == 'malformed' else 'ok'
+        elif args.command == 'install-hooks':
+            result['file_count'] = install_entry_hook(args.workspace, args.host)
+            result['runtime_discovery_verified'] = False
         else:
             ws = Workspace.load(args.workspace)
             if args.command == 'validate-evidence':
@@ -108,6 +117,7 @@ def main(argv=None):
             elif args.command == 'install-skills':
                 result['skill_count'] = install_skills(ws.root, args.host)
                 result['runtime_discovery_verified'] = False
+
             elif args.command == 'render':
                 from .render import render_html, render_pdf
                 source = confined(ws.root, args.source)

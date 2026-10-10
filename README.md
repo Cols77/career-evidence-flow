@@ -33,6 +33,8 @@ The host reads the skill and references, writes the evidence and drafts, and inv
 
 To work from a separate candidate workspace, install the complete skills there with `cv install-skills --workspace ROOT --host codex` (or `claude`/`hermes`) and follow [host setup](docs/agent-hosts.md). Existing skill directories are never overwritten. Installation does not prove runtime discovery.
 
+For a guided colleague-facing setup — Python>=3.11 venv, a private workspace outside this repo, optional reuse of an existing workspace, and `cv onboard --workspace ROOT` read-only state routing (interview **or** import), `cv install-skills --workspace ROOT --host hermes`, and the Hermes entry-hook opt-ins (`cv install-hooks --workspace ROOT --host hermes` with `HERMES_ENABLE_PROJECT_PLUGINS=1` and `hermes plugins enable resume-toolkit`) — read [docs/getting-started.md](docs/getting-started.md). The hook supports only a dedicated CLI launched at the workspace root; desktop/gateway are not certified, and it is advisory routing, not a sandbox or factuality guarantee. This is a preview, not a colleague-ready full release.
+
 ## Try a synthetic example
 
 ```powershell

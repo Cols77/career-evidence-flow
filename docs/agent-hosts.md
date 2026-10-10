@@ -20,6 +20,24 @@ Current Hermes documents project discovery of `.hermes/skills/` and `.agents/ski
 
 `cv install-skills --workspace ROOT --host hermes` writes workspace-local `.hermes/skills/` copies. They are not your global `~/.hermes/skills/` installation. A standalone directory without a Git root or project trust may not be discovered. Older hosts may require their documented external-directory configuration; the toolkit does not alter it.
 
+For a guided fresh setup (venv, private workspace, state routing, skills and entry-hook opt-in), see [getting-started.md](getting-started.md).
+
+### Hermes entry-hook routing (workspace `cv onboard` route)
+
+`cv install-hooks --workspace ROOT --host hermes` installs a packaged `pre_llm_call` entry plugin at `ROOT/.hermes/plugins/resume-toolkit/` (plugin.yaml, `__init__.py`, `onboarding.py`, plus bundled `cv_toolkit` validators). It writes files only; it never changes live Hermes config or global memory. The plugin activates only after explicit, separate opt-ins:
+
+1. **Project plugin discovery**: Hermes scans `.hermes/plugins/` only when project plugins are enabled — set `HERMES_ENABLE_PROJECT_PLUGINS=1` (docs use `true`) before launching Hermes.
+2. **Enable/trust**: run `hermes plugins enable resume-toolkit` (or the equivalent enable/trust command for the installed version) and review the plugin at `ROOT/.hermes/plugins/resume-toolkit/` first; the toolkit runs no trust command itself.
+
+Restart Hermes from the exact workspace root after installing skills or enabling the plugin.
+
+The hook is scoped and advisory:
+- It supports only a **dedicated CLI process launched at the exact workspace root**; it compares process cwd to the plugin root and stays **silent** when they differ. **Hermes desktop and gateway processes are not certified.**
+- It returns `pre_llm_call` user context each turn, routing the agent to the workflow determined by the read-only `cv onboard --workspace ROOT` classifier (`experience-capture` for capture/interview/import, `application-materials` when ready, etc.).
+- It is **advisory routing, not a sandbox**: structural validity does not prove factual truth, and approval/release is never asserted. It reads only structural records, never candidate prose.
+
+Verify in a fresh, dedicated CLI session at `ROOT` that the plugin and the four skills are listed, then run a synthetic job-to-preview scenario. Do not claim production acceptance from fixture records.
+
 ## Other hosts and manual loading
 
 Give the host `AGENTS.md` and the full path to `skills/application-materials/SKILL.md`, or to its installed copy. Ask it to read the linked references. Explicitly state the private workspace and installed `cv` executable. File access, conversations, delegation, browsing and artifact inspection are supplied by the host. If one is unavailable, report the missing capability and continue only the supported preview stages.
