@@ -1,0 +1,55 @@
+{
+  "schema_version": "1",
+  "candidate_id": "candidate.synthetic-researcher",
+  "items": [
+    {
+      "id": "identity.primary",
+      "kind": "identity",
+      "claims": [
+        {
+          "id": "claim.name",
+          "text": "Jordan Sample",
+          "status": "confirmed",
+          "publication": "allowed",
+          "sources": [
+            "source.owner"
+          ]
+        },
+        {
+          "id": "claim.email",
+          "text": "jordan@example.invalid",
+          "status": "confirmed",
+          "publication": "allowed",
+          "sources": [
+            "source.owner"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "education.methods",
+      "kind": "education",
+      "label": "Research methods coursework",
+      "claims": [
+        {
+          "id": "claim.methods",
+          "text": "Completed coursework in research methods and descriptive statistics.",
+          "status": "confirmed",
+          "publication": "allowed",
+          "sources": [
+            "source.owner"
+          ]
+        },
+        {
+          "id": "claim.methods.scope",
+          "text": "Analyzed a synthetic survey dataset as a supervised course project.",
+          "status": "confirmed",
+          "publication": "allowed",
+          "sources": [
+            "source.owner"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "schema_version": "1",
+  "candidate_id": "candidate.synthetic-developer",
+  "items": [
+    {
+      "id": "identity.primary",
+      "kind": "identity",
+      "claims": [
+        {
+          "id": "claim.name",
+          "text": "Alex Example",
+          "status": "confirmed",
+          "publication": "allowed",
+          "sources": [
+            "source.owner"
+          ]
+        },
+        {
+          "id": "claim.email",
+          "text": "alex@example.invalid",
+          "status": "confirmed",
+          "publication": "allowed",
+          "sources": [
+            "source.owner"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "project.web",
+      "kind": "project",
+      "label": "Community inventory project",
+      "claims": [
+        {
+          "id": "claim.web",
+          "text": "Built an inventory prototype in Python for a community workshop.",
+          "status": "confirmed",
+          "publication": "allowed",
+          "sources": [
+            "source.owner"
+          ]
+        },
+        {
+          "id": "claim.web.scope",
+          "text": "The prototype runs locally and has not been deployed to production.",
+          "status": "confirmed",
+          "publication": "allowed",
+          "sources": [
+            "source.owner"
+          ]
+        }
+      ]
+    }
+  ]
+}

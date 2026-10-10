@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "id": "projection.general",
+  "label": "General synthetic profile",
+  "sections": [
+    {
+      "id": "section.identity",
+      "label": "Contact",
+      "item_ids": [
+        "identity.primary"
+      ],
+      "claim_ids": [
+        "claim.name",
+        "claim.email"
+      ]
+    },
+    {
+      "id": "section.background",
+      "label": "Projects",
+      "item_ids": [
+        "project.web"
+      ],
+      "claim_ids": [
+        "claim.web",
+        "claim.web.scope"
+      ]
+    }
+  ]
+}

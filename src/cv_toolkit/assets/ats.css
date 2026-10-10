@@ -1,0 +1,16 @@
+@page { size: A4; margin: 17mm 18mm; }
+* { box-sizing: border-box; }
+body { margin: 0; background: #ffffff; color: #222222; font-family: Arial, sans-serif; font-size: 10.5pt; line-height: 1.35; }
+article { max-width: 175mm; margin: 0 auto; }
+h1 { font-size: 22pt; margin: 0 0 7pt; }
+h2 { font-size: 12pt; border-bottom: 1px solid #cccccc; padding-bottom: 3pt; margin: 14pt 0 6pt; }
+h3, h4 { font-size: 11pt; margin: 9pt 0 4pt; }
+h1, h2, h3, h4 { break-after: avoid; }
+p { margin: 0 0 7pt; }
+ul, ol { margin: 4pt 0 8pt; padding-left: 17pt; }
+li { margin-bottom: 3pt; }
+a { color: inherit; text-decoration: underline; overflow-wrap: anywhere; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 4pt; border-bottom: 1px solid #dddddd; text-align: left; }
+pre, code { font-family: monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+blockquote { margin: 8pt 0; padding-left: 10pt; border-left: 2px solid #cccccc; }

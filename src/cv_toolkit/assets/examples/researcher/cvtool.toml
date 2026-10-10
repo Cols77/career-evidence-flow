@@ -1,0 +1,9 @@
+[profile]
+display_name = "Jordan Sample"
+email = "jordan@example.invalid"
+
+[paths]
+profile = "profile"
+applications = "applications"
+styles = "styles"
+outputs = "outputs"

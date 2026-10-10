@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "id": "projection.general",
+  "label": "General synthetic profile",
+  "sections": [
+    {
+      "id": "section.identity",
+      "label": "Contact",
+      "item_ids": [
+        "identity.primary"
+      ],
+      "claim_ids": [
+        "claim.name",
+        "claim.email"
+      ]
+    },
+    {
+      "id": "section.background",
+      "label": "Education",
+      "item_ids": [
+        "education.methods"
+      ],
+      "claim_ids": [
+        "claim.methods",
+        "claim.methods.scope"
+      ]
+    }
+  ]
+}
