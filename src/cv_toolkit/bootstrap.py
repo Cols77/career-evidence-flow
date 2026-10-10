@@ -44,14 +44,26 @@ def install_skills(root, host):
     root = Path(root).resolve(strict=True)
     payload = []
     for name in SKILLS:
-        target = root / prefix / name / 'SKILL.md'
-        if target.exists():
+        folder = root / prefix / name
+        if folder.exists() or folder.is_symlink():
             raise ToolkitError('skill already exists')
-        if not target.resolve(strict=False).is_relative_to(root):
+        if not folder.resolve(strict=False).is_relative_to(root):
             raise ToolkitError('skill path escapes workspace')
-        raw = files('cv_toolkit').joinpath('assets', 'skills', name, 'SKILL.md').read_bytes()
-        payload.append((target, raw))
+        source = files('cv_toolkit').joinpath('assets', 'skills', name)
+        if not source.joinpath('SKILL.md').is_file():
+            raise ToolkitError('skill manifest missing')
+        payload.extend(_skill_resources(source, folder))
     for target, raw in payload:
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(raw)
-    return len(payload)
+    return len(SKILLS)
+
+
+def _skill_resources(source, target):
+    """Copy Traversable resources, including references, outside the source tree."""
+    for resource in source.iterdir():
+        destination = target / resource.name
+        if resource.is_dir():
+            yield from _skill_resources(resource, destination)
+        elif resource.is_file():
+            yield destination, resource.read_bytes()

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "resume-toolkit"
 version = "0.1.0"
-description = "Generic offline evidence and document preparation toolkit"
+description = "Agent-led resume and cover-letter workflows with evidence validation and document tools"
 requires-python = ">=3.11"
 dependencies = [
   "Markdown>=3.7",
@@ -22,7 +22,7 @@ cv = "cv_toolkit.cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-cv_toolkit = ["assets/*.css", "assets/*.html", "assets/examples/*/*", "assets/skills/*/*.md"]
+cv_toolkit = ["assets/*.css", "assets/*.html", "assets/examples/*/*", "assets/skills/*/*.md", "assets/skills/*/references/*.md", "assets/skills/*/references/*/*.md"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

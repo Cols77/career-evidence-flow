@@ -1,4 +1,4 @@
-"""Generic offline workspace tools. Validation is not semantic approval."""
+"""Evidence and document tools for agent-led application workflows. Validation is not approval."""
 import argparse
 import json
 import os

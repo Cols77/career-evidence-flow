@@ -11,5 +11,4 @@ def test_neutral_distribution_preserves_console_entrypoint():
     manifest = Path(__file__).resolve().parents[1] / "pyproject.toml"
     project = tomllib.loads(manifest.read_text(encoding="utf-8"))["project"]
     assert project["name"] == "resume-toolkit"
-    assert project["description"] == "Generic offline evidence and document preparation toolkit"
     assert project["scripts"]["cv"] == "cv_toolkit.cli:main"

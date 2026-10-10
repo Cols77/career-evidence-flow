@@ -6,6 +6,7 @@ Requires locally installed Chrome/Chromium for the sequential PDF matrix.
 import argparse
 import json
 from pathlib import Path
+import re
 import subprocess
 import sys
 
@@ -43,6 +44,16 @@ def main(argv=None):
             record = command('install-skills', '--workspace', str(root), '--host', host)
             assert record['skill_count'] == 4
             assert record['runtime_discovery_verified'] is False
+            prefix = {'codex': '.agents/skills', 'claude': '.claude/skills', 'hermes': '.hermes/skills'}[host]
+            for skill in ('experience-capture', 'application-materials', 'resume-review', 'cover-letter-review'):
+                folder = root / prefix / skill
+                pages = list(folder.rglob('*.md'))
+                assert len(pages) >= 2, 'installed skill references missing'
+                for page in pages:
+                    for link in re.findall(r'\]\(([^)]+)\)', page.read_text(encoding='utf-8')):
+                        if '://' not in link and not link.startswith('#'):
+                            target = (page.parent / link.split('#')[0]).resolve()
+                            assert target.is_relative_to(root) and target.is_file(), 'broken installed skill reference'
         for kind, source, styles in [('resume', 'resume.md', ('ats', 'branded')), ('cover_letter', 'letter.md', ('letter',))]:
             for style in styles:
                 relative = f'outputs/{kind}-{style}.html'

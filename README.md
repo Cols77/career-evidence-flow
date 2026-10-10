@@ -1,42 +1,60 @@
 # Resume Toolkit
 
-An offline Python toolkit for owner-supplied candidate evidence and application document previews. This repository contains synthetic examples and fresh history. Keep real profiles, answers and outputs in a separate private workspace.
+Generate a resume and cover letter with an AI agent, grounded in the candidate's real experience. The agent interviews you where evidence is missing, maps your background to the full job description, drafts the requested documents and coordinates independent reviews.
 
-Requires Python 3.11 or newer. PDF previews additionally require a local Chrome/Chromium installation. No API key, hosted model or provider call is required.
+The agent workflows are the product entrypoint. Python supplies the evidence validators, application records and document renderer. Those helpers run locally without an API key; your chosen AI host supplies the model, conversation, browsing and agent tools.
+
+## Workflows and skills
+
+| Skill | Use it to |
+| --- | --- |
+| [application-materials](skills/application-materials/SKILL.md) | Run the job-to-resume-and-letter workflow, including material questions and review handoffs |
+| [experience-capture](skills/experience-capture/SKILL.md) | Capture real experience with sources, ownership and limitations |
+| [resume-review](skills/resume-review/SKILL.md) | Independently review evidence, job fit, voice, ATS output and layout |
+| [cover-letter-review](skills/cover-letter-review/SKILL.md) | Independently review genuine motivation, company relevance, consistency and layout |
+
+Read [the application workflow](docs/application-workflow.md) and [host setup](docs/agent-hosts.md). The canonical skills and their supporting references live in `skills/`. Generated repository copies live in `.agents/skills/` for Codex/Hermes and `.claude/skills/` for Claude Code. [AGENTS.md](AGENTS.md) is the generic agent entrypoint; [CLAUDE.md](CLAUDE.md) points Claude to the same workflow.
+
+## Start with an agent
+
+Install the local helpers once (Python 3.11 or newer):
 
 ```powershell
 python -m venv .venv
 .venv/Scripts/python -m pip install -e ".[test]"
-.venv/Scripts/cv init ../candidate-demo --example developer
-.venv/Scripts/cv validate-evidence --workspace ../candidate-demo
-.venv/Scripts/cv validate-projection --workspace ../candidate-demo
-.venv/Scripts/cv render --workspace ../candidate-demo --source resume.md --output outputs/resume.html
-.venv/Scripts/cv check --workspace ../candidate-demo --document outputs/resume.html
-.venv/Scripts/cv render --workspace ../candidate-demo --source letter.md --output outputs/letter.html --kind cover_letter --style letter
-.venv/Scripts/cv check --workspace ../candidate-demo --document outputs/letter.html --kind cover_letter
+.venv/Scripts/cv init ../my-private-workspace --name "Your supplied name"
 ```
 
-The second example is `--example researcher`. Both people and their background are synthetic. To start without fixture claims, use `cv init ../my-private-workspace --name "Your supplied name"`. The empty evidence record intentionally does not validate until actual evidence has been captured. Init refuses nonempty destinations and has no force option.
+Open this checkout in your AI host, give it access to that private workspace, and ask:
 
-To create PDF previews, use `--format pdf --output outputs/resume.pdf`. HTML is regenerated from the current Markdown for every PDF request. Rendering uses packaged local CSS, rejects images and raw HTML, and permits ordinary inert hyperlinks. It performs no network retrieval.
+> Use application-materials. My private candidate workspace is ../my-private-workspace. Help me capture my actual experience, then tailor a resume and cover letter to the full job description I supply. Ask only questions that change the application, preserve unknowns and limitations, and run independent reviewers when available. Follow the employer's document and AI-use instructions.
 
-Freeze the full supplied job text in a workspace-relative UTF-8 file:
+The host reads the skill and references, writes the evidence and drafts, and invokes `cv` using the installed executable. A blank workspace intentionally has no candidate claims until real facts are captured. No command invents a profile or generates prose without an agent.
+
+To work from a separate candidate workspace, install the complete skills there with `cv install-skills --workspace ROOT --host codex` (or `claude`/`hermes`) and follow [host setup](docs/agent-hosts.md). Existing skill directories are never overwritten. Installation does not prove runtime discovery.
+
+## Try a synthetic example
 
 ```powershell
-cv create-application --workspace ../candidate-demo --slug sample-role --job job.txt --company "Example Organization" --title "Developer"
-cv status --workspace ../candidate-demo --application applications/sample-role
+cv init ../candidate-demo --example developer
+cv validate-evidence --workspace ../candidate-demo
+cv validate-projection --workspace ../candidate-demo
+cv render --workspace ../candidate-demo --source resume.md --output outputs/resume.html
+cv check --workspace ../candidate-demo --document outputs/resume.html
+cv render --workspace ../candidate-demo --source letter.md --output outputs/letter.html --kind cover_letter --style letter
+cv check --workspace ../candidate-demo --document outputs/letter.html --kind cover_letter
 ```
 
-The application begins with `extraction_complete: false`, an explicit effective policy and empty requirements/questions. A host agent or person supplies the extraction and truthful evidence mappings. Job text never establishes applicant facts. Unknown and unsupported requirements are retained as gaps. Actual answers are stored in the questions record with provenance; explicit corrections retain their history. See [the workflow](docs/workflow.md) for schema and command details.
+`--example researcher` provides a second synthetic background. Both are fixtures, never facts about you. PDF previews require local Chrome/Chromium; add `--format pdf` and use a `.pdf` output path. HTML is regenerated from current Markdown on every PDF request.
 
-```powershell
-cv install-skills --workspace ../candidate-demo --host codex
-```
+The host freezes supplied job text with `cv create-application`, maps requirements and persists real answers. See [schemas and executable commands](docs/workflow.md) for exact records, policy overrides, corrections and question dispositions. Unknown requirements remain gaps; a local project remains a local project. Resume and cover letter are the default, with employer instructions taking precedence.
 
-Four packaged host skills cover evidence capture, application drafting, resume review and cover-letter review. `--host claude` and `--host hermes` select their workspace skill locations. Existing skills are never overwritten. Installation reports that runtime discovery is unverified; restart/reload your host and confirm its actual skill discovery. File creation alone is not host acceptance.
+## Current implementation boundary
 
-Implemented: workspace confinement, canonical evidence/source registry, ordered projections, frozen job manifests, requirement/question validation, answer persistence, generic HTML/PDF previews, ATS/letter checks, synthetic examples, packaged skills and an external-denylist privacy scanner. Optional JEV adapter code is retained for offline validation tests; the generic CLI does not enable or invoke it.
+The four agent skills include interview procedures, drafting steps, schema examples and independent review rubrics. The helpers validate evidence/source joins, projections, frozen job bytes, requirements and questions; persist answers and corrections; render HTML/PDF previews; and check document text and limits.
 
-Unfinished: exhaustive document claim maps and semantic entailment, authenticated independent review records, dependency-complete invalidation, two-round enforcement, immutable reviewed-byte release and genuine end-to-end host acceptance. No current command certifies approval, freshness of declared evidence fingerprints, or submission readiness. `cv status` always reports draft-only readiness. This is a usable foundation for further development, not completion of the full application workflow.
+The full guarded release system remains unfinished: exhaustive claim maps, authenticated reviewer records, complete dependency invalidation, enforced repair rounds and immutable reviewed-byte release. `cv status` always reports `draft_only` and `release_available: false`. Files are previews; successful checks do not certify submission readiness. See [review and release](docs/review-and-release.md). Native host discovery and full host acceptance must be demonstrated separately from installing files or running tests.
 
-Run tests with `python -m pytest -q`. Before committing or sharing, run the scanner with an external private denylist and manually inspect the proposed file allowlist. See [privacy checks](docs/privacy.md). This repository currently provides no open-source license; it has not been published to PyPI.
+Keep real profiles, answers and outputs outside this public repository. It contains synthetic examples and fresh history. Before publishing changes, run [privacy checks](docs/privacy.md) with an external private denylist and inspect the file allowlist. No open-source license has been selected, and this project is not published to PyPI.
+
+For development: `python -m pytest -q`; check generated skill copies with `python tools/sync_skills.py --check`. Edit only `skills/` and regenerate with `python tools/sync_skills.py`. See [contributing](CONTRIBUTING.md).
