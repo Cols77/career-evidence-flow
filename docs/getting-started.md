@@ -172,7 +172,8 @@ may attach advisory user context routing the agent to the correct workflow.
 - **Boundaries set by the current integration:**
   - It only supports a **dedicated CLI process launched at the exact workspace
     root**. The hook compares the process cwd to the plugin's workspace root and
-    stays **silent** when they differ.
+    stays **silent** when they differ. It also requires an explicit `cli`
+    platform payload; absent/unknown platform values do not opt into routing.
   - **Hermes desktop and gateway processes are NOT certified** by this
     integration; shared long-running processes that are not launched fresh at
     that root are not guaranteed to fire the hook and should not be assumed to
@@ -190,6 +191,11 @@ may attach advisory user context routing the agent to the correct workflow.
   after installation or trust changes.
 
 ## 7. Next steps and honest limits
+
+For desktop use, follow [explicit workspace routing](agent-hosts.md#desktop-explicit-workspace-routing-not-a-process-cwd-hook)
+rather than assuming the CLI hook follows the active chat's workspace.
+The optional [JEV evidence-review adapter](optional-jev-review.md) is separately
+invoked, disabled by default and never a replacement for independent review.
 
 Launch the dedicated CLI at the workspace root, confirm the four skills appear,
 then ask it to run `application-materials` on your private workspace. Run

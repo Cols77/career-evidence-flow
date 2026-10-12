@@ -220,3 +220,15 @@ def test_hook_error_is_visible_and_ready_routes_on_later_turn(tmp_path, monkeypa
     monkeypatch.setattr(module.onboarding, 'classify', lambda root: SimpleNamespace(
         as_context=lambda: {'context': 'application-materials'}))
     assert 'application-materials' in module._route(platform='cli', is_first_turn=False)['context']
+
+
+@pytest.mark.parametrize('payload', [{}, {'platform': None}, {'platform': ''},
+                                    {'platform': 'desktop'}, {'platform': 'gateway'}])
+def test_hook_requires_explicit_cli_before_reading_records(tmp_path, monkeypatch, payload):
+    install_entry_hook(tmp_path, 'hermes')
+    module = _load_installed_plugin(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    reads = []
+    monkeypatch.setattr(module.onboarding, 'classify', lambda root: reads.append(root))
+    assert module._route(**payload) is None
+    assert reads == []

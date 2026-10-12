@@ -28,3 +28,20 @@ def test_missing_validator_never_claims_ready(tmp_path, monkeypatch):
     ws = init_workspace(tmp_path / 'ws')
     monkeypatch.setattr('cv_toolkit.onboarding._CANONICAL', False)
     assert classify(ws).state == 'malformed'
+
+
+def test_explicit_workspace_routing_does_not_reuse_process_cwd(tmp_path, monkeypatch, capsys):
+    empty = init_workspace(tmp_path / 'empty')
+    synthetic = init_workspace(tmp_path / 'synthetic', example='developer')
+    monkeypatch.chdir(synthetic)
+    before = {p: p.read_bytes() for root in (empty, synthetic)
+              for p in root.rglob('*') if p.is_file()}
+    for root, expected in ((empty, 'missing_candidate'), (synthetic, 'synthetic'),
+                           (empty, 'missing_candidate')):
+        assert main(['onboard', '--workspace', str(root)]) == 0
+        result = json.loads(capsys.readouterr().out)
+        assert result['state'] == expected
+        assert result['skill'] == 'experience-capture'
+    after = {p: p.read_bytes() for root in (empty, synthetic)
+             for p in root.rglob('*') if p.is_file()}
+    assert after == before

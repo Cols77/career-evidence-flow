@@ -2,8 +2,9 @@
 
 This module is the single authored source for routing a Hermes session that is
 launched inside a private toolkit workspace. ``classify`` reads only structural
-records (workspace config, evidence, registry, projection manifests) and never
-the candidate's private prose. It returns bounded routing intent: which host
+records (workspace config, evidence including claim text, registry and projection
+manifests), but never follows original source documents. It returns bounded
+routing intent without candidate claim text: which host
 workflow to load and the concrete next action.
 
 Readiness is decided by the canonical validators, never by a reimplemented

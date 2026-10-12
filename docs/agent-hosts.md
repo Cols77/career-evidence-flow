@@ -32,18 +32,56 @@ For a guided fresh setup (venv, private workspace, state routing, skills and ent
 Restart Hermes from the exact workspace root after installing skills or enabling the plugin.
 
 The hook is scoped and advisory:
-- It supports only a **dedicated CLI process launched at the exact workspace root**; it compares process cwd to the plugin root and stays **silent** when they differ. **Hermes desktop and gateway processes are not certified.**
+- It supports only a **dedicated CLI process launched at the exact workspace root**, with an explicit `platform='cli'` hook payload; it stays **silent** for missing/unknown platforms or when process cwd differs from the plugin root. **Hermes desktop and gateway processes are not certified.**
 - It returns `pre_llm_call` user context each turn, routing the agent to the workflow determined by the read-only `cv onboard --workspace ROOT` classifier (`experience-capture` for capture/interview/import, `application-materials` when ready, etc.).
-- It is **advisory routing, not a sandbox**: structural validity does not prove factual truth, and approval/release is never asserted. It reads only structural records, never candidate prose.
+- It is **advisory routing, not a sandbox**: structural validity does not prove factual truth, and approval/release is never asserted. It validates local records including claim text, but does not follow original source documents or include candidate claim text in routing context.
 
 Verify in a fresh, dedicated CLI session at `ROOT` that the plugin and the four skills are listed, then run a synthetic job-to-preview scenario. Do not claim production acceptance from fixture records.
 
 ## Other hosts and manual loading
+
+### Desktop: explicit workspace routing, not a process-cwd hook
+
+In a shared desktop process, do not enable this project hook as a substitute for
+session workspace identity. The documented `pre_llm_call` payload and the inspected
+Hermes implementation supply session/platform identifiers, but no workspace path.
+Do not infer it from message text, global cwd, another session or global memory.
+
+Instead, use the user's explicit private workspace for each operation:
+
+1. Run the installed `cv onboard --workspace ABSOLUTE_ROOT` command.
+2. Follow its returned state. For `unconfigured` or `malformed`, repair/setup
+   before drafting; otherwise load the returned workflow from
+   `ABSOLUTE_ROOT/.hermes/skills/SKILL_NAME/SKILL.md` and its references.
+3. If native project discovery is unavailable, use absolute-path file reads.
+   File reads are a fallback, not proof of `skills_list`/`skill_view` discovery.
+4. Pass that same explicit root to subsequent `cv` commands. After a workspace
+   switch, re-run onboarding for the new root; never reuse the previous route.
+
+This is host-directed use of existing commands, not automatic desktop hook
+support. Automated desktop routing remains blocked on a documented session-scoped
+workspace contract and real multi-session isolation tests. No desktop UI plugin
+or new core tool is required for this explicit workflow.
+
+The reference contract is the [Hermes pre-LLM hook documentation](https://hermes-agent.nousresearch.com/docs/user-guide/features/hooks#pre_llm_call).
+Check the installed host's payload before expanding this adapter's scope; do not
+assume a future extra field is trustworthy without verifying its session binding.
 
 Give the host `AGENTS.md` and the full path to `skills/application-materials/SKILL.md`, or to its installed copy. Ask it to read the linked references. Explicitly state the private workspace and installed `cv` executable. File access, conversations, delegation, browsing and artifact inspection are supplied by the host. If one is unavailable, report the missing capability and continue only the supported preview stages.
 
 ## Acceptance evidence
 
 Automated tests check distribution consistency, reference resolution and installation without overwrites. A wheel installation should also be exercised outside the checkout. A manual agent scenario can prove that the instructions guide actual tool use, but does not prove native discovery in another host.
+
+`tests/test_entry_hook.py` exercises real Hermes lifecycle dispatch without
+inference. Its platform checks reject ambiguous context before reading records.
+`tests/test_onboard_cli.py` checks explicit-root routing across workspace switches
+without relying on the process cwd or mutating candidate records.
+`tests/test_hermes_skill_discovery.py` exercises native `skills_list` and
+`skill_view` against temporary trusted/untrusted project roots, checks the exact
+installed source path and a linked reference, and verifies no-Git non-discovery.
+These tests use an isolated `HERMES_HOME` and no inference calls; they skip when
+no Hermes interpreter is available. They prove API discovery, not a desktop
+menu or a complete live-agent drafting/review run.
 
 To verify native discovery, start a fresh session in the chosen scope, confirm the four skills in its index/menu, load application-materials and one linked reference, and run a synthetic job-to-preview scenario. Preserve actual host/version, scope and tool outcomes in private local verification notes. Do not use fixture review records to claim production acceptance. No global host configuration, trust or paid provider calls are changed by the installer.

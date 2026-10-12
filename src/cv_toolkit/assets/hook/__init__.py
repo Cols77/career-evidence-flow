@@ -18,7 +18,8 @@ def _route(**kwargs):
     root = _workspace_root()
     if Path.cwd().resolve() != root:
         return None
-    if kwargs.get('platform') not in (None, '', 'cli'):
+    # An absent platform is not evidence of a dedicated CLI session.
+    if kwargs.get('platform') != 'cli':
         return None
     try:
         state = onboarding.classify(root)
