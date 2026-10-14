@@ -7,12 +7,15 @@ from __future__ import annotations
 
 import argparse
 from contextlib import contextmanager
+from datetime import datetime, timezone
 import hashlib
 import json
 import os
 from pathlib import Path
 import re
 import sys
+import time
+import uuid
 
 from .onboarding import STATE_TO_SKILL, classify
 from .records import ToolkitError, _decode, atomic_write_json, confined, load_json, object_fields
@@ -26,6 +29,65 @@ MAX_FILE_BYTES = 128_000_000
 _DIGEST = re.compile(r'[0-9a-f]{64}')
 _SESSION = re.compile(r'[A-Za-z0-9][A-Za-z0-9_.:-]{0,255}')
 _WARNING = 'Resume Toolkit routing/checkpoint unavailable; run cv onboard and workflow-status with the explicit workspace. No review or completion has been verified.'
+_LOG_WARNING = 'Resume Toolkit execution logging unavailable.'
+
+
+class _ExecutionLog:
+    """One atomic record per process; diagnostics do not authenticate origin."""
+
+    def __init__(self, installed_root, probe):
+        self.path = None
+        self.started = time.monotonic()
+        self.data = {}
+        try:
+            root = _root(installed_root)
+            invocation = uuid.uuid4().hex
+            relative = f'.codex/resume-toolkit/logs/{invocation}.json'
+            path = confined(root, relative, required=False)
+            if path != root / relative or path.is_symlink():
+                raise ToolkitError('log aliases are unsupported')
+            self.data = {
+                'schema_version': 1, 'invocation_id': invocation,
+                'started_at': datetime.now(timezone.utc).isoformat(),
+                'stage': 'started', 'mode': 'manual_probe' if probe else 'hook_command',
+                'native_origin_verified': False, 'pid': os.getpid(),
+                'workspace_sha256': _digest(os.path.normcase(str(root))),
+                'adapter_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+                'event': None, 'source': None, 'session_sha256': None,
+            }
+            self.path = path
+            self.root = root
+            self.relative = relative
+            self._write()
+        except (OSError, ValueError, RuntimeError):
+            self.path = None
+            print(_LOG_WARNING, file=sys.stderr)
+
+    def _write(self):
+        if self.path is None:
+            return
+        try:
+            if (_root(self.root) != self.root
+                    or confined(self.root, self.relative, required=False) != self.path
+                    or self.path.is_symlink()):
+                raise ToolkitError('log aliases are unsupported')
+            self.path.parent.mkdir(parents=True, exist_ok=True)
+            atomic_write_json(self.path, self.data)
+        except (OSError, ValueError, RuntimeError):
+            self.path = None
+            print(_LOG_WARNING, file=sys.stderr)
+
+    def finish(self, payload, outcome, trace):
+        if isinstance(payload, dict):
+            event, source, session = (payload.get(key) for key in ('hook_event_name', 'source', 'session_id'))
+            self.data['event'] = event if event in EVENTS else None
+            self.data['source'] = source if source in ('startup', 'resume', 'clear', 'compact') else None
+            if isinstance(session, str) and _SESSION.fullmatch(session):
+                self.data['session_sha256'] = _digest(session)
+        self.data.update(stage='completed', completed_at=datetime.now(timezone.utc).isoformat(),
+                         duration_ms=round((time.monotonic() - self.started) * 1000, 3),
+                         outcome=outcome, **trace)
+        self._write()
 
 
 def _digest(text):
@@ -188,8 +250,10 @@ def _context(route, state, session):
     return text
 
 
-def dispatch(payload, workspace):
+def dispatch(payload, workspace, *, _trace=None):
     """Consume documented host metadata only; never read transcripts or messages."""
+    trace = _trace if _trace is not None else {}
+    trace['outcome'] = 'ignored'
     if not isinstance(payload, dict) or payload.get('hook_event_name') not in EVENTS:
         return {}
     session = payload.get('session_id')
@@ -225,10 +289,14 @@ def dispatch(payload, workspace):
             state['last_event'] = event
             atomic_write_json(path, state)
         if route is not None:
+            status = checkpoint_status(root, session)
+            trace.update(outcome='context_emitted', route=route.state, freshness=status['freshness'])
             return {'hookSpecificOutput': {'hookEventName': event,
-                    'additionalContext': _context(route, checkpoint_status(root, session), session)}}
+                    'additionalContext': _context(route, status, session)}}
+        trace.update(outcome='observed', route=state['route'])
         return {}
     except (OSError, ValueError, RuntimeError, RecursionError, OverflowError, TypeError):
+        trace['outcome'] = 'error'
         return {'systemMessage': _WARNING}
 
 
@@ -236,15 +304,22 @@ def main(installed_root):
     """Installed runner entrypoint, independent of cwd/PYTHONPATH/package install."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--workspace', required=True, type=Path)
+    parser.add_argument('--probe', action='store_true', help='Label this invocation as a manual diagnostic probe')
     args = parser.parse_args()
+    log = _ExecutionLog(installed_root, args.probe)
+    payload, trace, outcome = None, {}, 'invalid_input'
     try:
         if _root(args.workspace) != _root(installed_root):
+            outcome = 'workspace_mismatch'
             raise ToolkitError('installation workspace mismatch')
         raw = sys.stdin.buffer.read(MAX_INPUT + 1)
         if len(raw) > MAX_INPUT:
             raise ToolkitError('hook input too large')
-        result = dispatch(_decode(raw), args.workspace)
+        payload = _decode(raw)
+        result = dispatch(payload, args.workspace, _trace=trace)
+        outcome = trace.pop('outcome')
     except (OSError, ValueError, RuntimeError, RecursionError, OverflowError):
         result = {'systemMessage': _WARNING}
     print(json.dumps(result, sort_keys=True))
+    log.finish(payload, outcome, trace)
     return 0

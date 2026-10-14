@@ -32,7 +32,41 @@ Restoration uses `SessionStart` with `source: compact`, whose output reaches the
 
 Each invocation checks the host payload's `session_id` and absolute `cwd` against the workspace encoded in its trusted command and installed location. Child directories are allowed, but an intervening nested `cvtool.toml` workspace is rejected. Other workspaces, missing/invalid session IDs and unsupported events are silent. Process cwd and message/transcript content never select the workspace. Hooks are local advisory code, not an authentication mechanism or security sandbox.
 
-Only state enums, session/workspace digests and explicitly selected relative file paths/hashes persist. No prompt, transcript, candidate identifier, claim text, answer or assistant response is stored. Filenames can themselves be private; keep the state private. New workspaces ignore `.codex/` in Git; add an appropriate ignore rule yourself for an older workspace. Input is limited to 256 KB, snapshots to 64 files of at most 128 MB each. Failures return a generic warning without private exception text. An exclusive session lock prevents lost writes; atomic replacement prevents partial JSON.
+Checkpoint state stores enums, session/workspace digests and explicitly selected relative file paths/hashes. Execution diagnostics described below also store timing, process and adapter metadata. No prompt, transcript, candidate identifier, claim text, answer or assistant response is stored. Filenames in snapshots can themselves be private; keep the state private. New workspaces ignore `.codex/` in Git; add an appropriate ignore rule yourself for an older workspace. Input is limited to 256 KB, snapshots to 64 files of at most 128 MB each. Failures return a generic warning without private exception text. An exclusive session lock prevents lost writes; atomic replacement prevents partial JSON.
+
+## Execution logs
+
+The installed runner automatically writes one JSON file per invocation under
+`.codex/resume-toolkit/logs/`. It writes `stage: started` before reading stdin,
+then atomically updates the same record to `stage: completed`. A record that
+remains started indicates incomplete observation, such as a killed or hung
+process; it does not establish why the process stopped.
+
+Records contain UTC start/end times, elapsed milliseconds, process and invocation
+IDs, session/workspace SHA-256 digests, the `codex_hooks.py` digest, allowlisted
+event/source names, route/freshness when evaluated, and an outcome:
+`context_emitted`, `observed`, `ignored`, `error`, `invalid_input`, or
+`workspace_mismatch`. Successful `Stop` observation is not workflow completion.
+Unique files avoid concurrent append collisions. Logs accumulate locally until
+the owner removes them; no background upload or automatic deletion occurs.
+Logging failures emit a generic stderr warning and leave routing operational.
+
+For a direct runner test, append `--probe` to label the record `manual_probe`.
+Installed hook commands use `hook_command`. Neither label authenticates the
+caller: a manual call without `--probe` also looks like a hook command. Every
+record therefore has `native_origin_verified: false`. To establish native
+delivery, correlate the time, event and SHA-256 of the host session ID with
+Codex's own hook-start/completion events. An empty log folder alone cannot
+distinguish an untrusted/skipped hook from a launch or logging failure.
+
+PowerShell inspection from the private workspace:
+
+```powershell
+Get-ChildItem .codex/resume-toolkit/logs/*.json |
+  Sort-Object LastWriteTime |
+  ForEach-Object { Get-Content -Raw -LiteralPath $_.FullName | ConvertFrom-Json } |
+  Select-Object started_at, event, stage, outcome, mode, duration_ms
+```
 
 ## Record and resume
 
