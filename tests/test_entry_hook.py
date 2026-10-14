@@ -49,7 +49,7 @@ def test_install_hook_refuses_overwrite_and_leaves_existing(tmp_path):
 
 def test_install_hook_rejects_other_hosts(tmp_path):
     with pytest.raises(ToolkitError):
-        install_entry_hook(tmp_path, "codex")
+        install_entry_hook(tmp_path, "claude")
     assert not (tmp_path / ".hermes/plugins" / HOOK_NAME).exists()
 
 

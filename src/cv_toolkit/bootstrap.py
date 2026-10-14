@@ -2,8 +2,10 @@
 from importlib.resources import files
 import json
 from pathlib import Path
+import shlex
+import sys
 
-from .records import ToolkitError, nonempty
+from .records import ToolkitError, confined, nonempty
 
 
 SKILLS = ('experience-capture', 'application-materials', 'resume-review', 'cover-letter-review')
@@ -33,7 +35,7 @@ def init_workspace(root, *, name='Candidate', example=None):
         path.write_bytes(raw)
     for name in ('applications', 'styles', 'outputs'):
         (root / name).mkdir(exist_ok=True)
-    (root / '.gitignore').write_text('outputs/\n.env\n.env.*\nprivate/\n.hermes/\n', encoding='utf-8')
+    (root / '.gitignore').write_text('outputs/\n.env\n.env.*\nprivate/\n.hermes/\n.codex/\n', encoding='utf-8')
     return root
 
 
@@ -99,13 +101,15 @@ def _hook_resources():
 
 
 def install_entry_hook(root, host):
-    """Install the state-aware Hermes entry hook into a private workspace.
+    """Install a state-aware host adapter into a private workspace.
 
     Refuses to overwrite an existing installation. Writes
     ``<root>/.hermes/plugins/resume-toolkit/{plugin.yaml,__init__.py,onboarding.py}``.
     The hook only loads when Hermes is launched from ``root`` with project
     plugins enabled and ``resume-toolkit`` under ``plugins.enabled``.
     """
+    if host == 'codex':
+        return _install_codex_hook(root)
     prefix = {'hermes': '.hermes/plugins'}.get(host)
     if prefix is None:
         raise ToolkitError('invalid hook host')
@@ -121,3 +125,46 @@ def install_entry_hook(root, host):
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(raw)
     return len(payload)
+
+
+def _install_codex_hook(root):
+    """Write a standalone native hook bundle; never merge config or grant trust."""
+    from .codex_hooks import EVENTS
+
+    root = Path(root).resolve(strict=True)
+    config = confined(root, '.codex/hooks.json', required=False)
+    target = confined(root, '.codex/hooks/resume-toolkit', required=False)
+    if (config != root / '.codex/hooks.json' or target != root / '.codex/hooks/resume-toolkit'
+            or (root / '.codex/hooks.json').is_symlink()
+            or (root / '.codex/hooks/resume-toolkit').is_symlink()):
+        raise ToolkitError('Codex installation aliases are unsupported')
+    if config.exists() or config.is_symlink() or target.exists() or target.is_symlink():
+        raise ToolkitError('Codex hook config or bundle already exists; inspect before installing')
+    runner = (
+        'from pathlib import Path\n'
+        'import sys\n'
+        'folder = Path(__file__).resolve().parent\n'
+        'sys.path.insert(0, str(folder))\n'
+        'from cv_toolkit.codex_hooks import main\n'
+        'raise SystemExit(main(folder.parents[2]))\n'
+    )
+    payload = [('run.py', runner.encode('utf-8'))]
+    for module in (*_HOOK_DEPENDENCIES, 'onboarding.py', 'codex_hooks.py'):
+        payload.append((f'cv_toolkit/{module}', files('cv_toolkit').joinpath(module).read_bytes()))
+    argv = [str(Path(sys.executable).resolve()), '-I', str(target / 'run.py'), '--workspace', str(root)]
+    windows = '& ' + ' '.join("'" + arg.replace("'", "''") + "'" for arg in argv)
+    command = shlex.join(argv)
+    hooks = {event: [{'hooks': [{'type': 'command', 'command': command,
+              'commandWindows': windows, 'timeout': 3 if event == 'Interrupt' else 10}]}]
+             for event in EVENTS}
+    # Complete all resource reads/path checks before writing any installation.
+    destinations = [(confined(root, (target / relative).relative_to(root).as_posix(), required=False), raw)
+                    for relative, raw in payload]
+    for path, raw in destinations:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open('xb') as stream:
+            stream.write(raw)
+    with config.open('x', encoding='utf-8') as stream:
+        json.dump({'hooks': hooks}, stream, indent=2)
+        stream.write('\n')
+    return len(payload) + 1

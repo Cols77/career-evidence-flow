@@ -46,9 +46,16 @@ def _parser():
     init.add_argument('directory', type=Path)
     init.add_argument('--name', default='Candidate')
     init.add_argument('--example', choices=('developer', 'researcher'))
-    for command in ('onboard', 'validate-evidence', 'validate-projection', 'render', 'check', 'install-skills', 'install-hooks', 'create-application', 'status', 'answer', 'resolve-question'):
+    for command in ('onboard', 'validate-evidence', 'validate-projection', 'render', 'check', 'install-skills', 'install-hooks', 'create-application', 'status', 'answer', 'resolve-question', 'workflow-checkpoint', 'workflow-status'):
         item = sub.add_parser(command)
         item.add_argument('--workspace', type=Path, required=True)
+        if command in ('workflow-checkpoint', 'workflow-status'):
+            item.add_argument('--session-id', required=True)
+        if command == 'workflow-checkpoint':
+            from .codex_hooks import PHASES, SKILLS
+            item.add_argument('--skill', choices=SKILLS, required=True)
+            item.add_argument('--phase', choices=PHASES, required=True)
+            item.add_argument('--file', action='append', default=[], help='Workspace-relative file to fingerprint; repeat for every review input/output')
         if command in {'validate-evidence', 'validate-projection', 'create-application', 'status', 'answer', 'resolve-question'}:
             item.add_argument('--evidence')
             item.add_argument('--registry')
@@ -104,6 +111,12 @@ def main(argv=None):
         elif args.command == 'install-hooks':
             result['file_count'] = install_entry_hook(args.workspace, args.host)
             result['runtime_discovery_verified'] = False
+        elif args.command in ('workflow-checkpoint', 'workflow-status'):
+            from .codex_hooks import checkpoint_status, record_checkpoint
+            if args.command == 'workflow-checkpoint':
+                result.update(record_checkpoint(args.workspace, args.session_id, args.skill, args.phase, args.file))
+            else:
+                result.update(checkpoint_status(args.workspace, args.session_id))
         else:
             ws = Workspace.load(args.workspace)
             if args.command == 'validate-evidence':

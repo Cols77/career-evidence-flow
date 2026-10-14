@@ -8,6 +8,8 @@ Launch Codex from this checkout. Its project copies are in `.agents/skills/`; ex
 
 For a separate private workspace, run `cv install-skills --workspace ROOT --host codex`, start the host there and confirm the four skill names are visible. If its discovery rules require a repository root, keep that workspace in a private local Git repository. Existing skill folders are not replaced.
 
+`cv install-hooks --workspace ROOT --host codex` installs native local lifecycle definitions and a standalone adapter. It reuses the canonical onboarding classifier and restores explicit session checkpoints across resume/compaction. It never changes feature settings or grants hook trust. See [Codex workflows](codex-workflows.md) for activation, isolation, checkpoint/freshness commands, delivery probes and tested versus unverified surfaces. Selected-byte freshness does not authenticate reviews or guard release.
+
 ## Claude Code
 
 Launch Claude Code from this checkout. Generated project skills are in `.claude/skills/`; use `/application-materials`. `CLAUDE.md` points to the shared agent instructions. Claude documents this directory as project scope and exposes the skill name as a slash command. See [Claude Code skills](https://code.claude.com/docs/en/skills).
