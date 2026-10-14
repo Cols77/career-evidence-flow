@@ -14,7 +14,7 @@ For each summary, skill and bullet, record a working support note with source un
 
 Select truthful actions and supported context/outcomes. A local prototype is not a production deployment. A team result is not personal sole ownership. Approximate values remain approximate. Coursework demonstrates coursework, not commercial experience. Mention tools only where evidence establishes their actual use. A listed skill needs evidence and visible same-document proof; otherwise omit it or record a specific unresolved finding. Do not invent an exception approval.
 
-Use JD keywords only when their meaning matches the candidate's actual experience. Explain acronyms on first relevant use and ensure the owner understands the terminology. Avoid generic self-praise, implausibly polished claims and repetitive patterns; review voice as a human judgment, never an AI-authorship probability.
+Use JD keywords only when their meaning matches the candidate's actual experience. Explain acronyms on first relevant use and ensure the owner understands the terminology. Apply the shared [voice and artifact review](voice-and-artifacts.md): load private writing preferences, edit for clarity and recheck factual scope before rendering. These criteria also apply to the cover letter.
 
 ## Cover letter
 
@@ -37,6 +37,8 @@ cv check --workspace ROOT --document outputs/SLUG/r01/cover-letter.html --kind c
 For PDF use the same source with a `.pdf` output and `--format pdf`. Chromium/Chrome is required. PDF generation regenerates HTML from current Markdown; it does not authenticate reviews or certify visual quality. Raw HTML, embedded images and active/resource markup are rejected. Keep links ordinary HTTP(S), mailto or fragments.
 
 HTML checks cannot establish final PDF pagination. If PDF or visual tooling is unavailable, explain which check was not exercised and retain preview status. Do not fabricate screenshots or label an unobserved artifact visually reviewed.
+
+Review `artifact_audit` from the same `cv check` result as described in [voice and artifact review](voice-and-artifacts.md#final-artifact-observations); no separate audit command or detector service is needed.
 
 ## Independent review and finish
 

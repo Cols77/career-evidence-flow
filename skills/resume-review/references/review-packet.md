@@ -22,7 +22,7 @@ Suggested alignment/content assignment:
 
 Suggested voice/comprehension assignment:
 
-> Independently review clarity, natural voice, repetitive/sloppy phrasing, unsupported self-praise and acronym comprehension. Ground changes in the person's actual evidence and vocabulary. Report lexical concerns as editorial findings, never an AI-authorship probability. Identify any terminology whose owner comprehension needs an actual question.
+> Independently apply the [shared voice criteria](../../application-materials/references/voice-and-artifacts.md) to the actual resume, private writing preferences and any supplied authentic samples. Check acronym comprehension; identify terminology whose owner comprehension needs a material question. Return the existing voice/comprehension verdict with exact affected passages.
 
 Suggested visual/artifact assignment:
 

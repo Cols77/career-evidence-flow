@@ -10,10 +10,10 @@ High findings: invented candidate facts/motivation, confidential disclosures or 
 | Company specificity | Are stated company facts actually sourced? Does the letter connect genuine contributions to employer needs? The company-swap test identifies genericness without authorizing invented knowledge. |
 | Role contribution | Does the letter select useful supported examples rather than repeat every resume bullet? Are transferable skills described honestly, with project/course limitations where relevant? |
 | Resume consistency | Compare with the current final resume: dates, titles, scope, claims, terms and motivation must not conflict. A changed resume invalidates this verdict. |
-| Voice and concision | Natural, direct language; no empty enthusiasm, exaggerated adjectives, generic mission flattery or repetitive stock patterns. Lexical observations are not AI detection. |
+| Voice and concision | Apply the shared [voice and artifact review](../../application-materials/references/voice-and-artifacts.md) against current private writing preferences and authentic samples, where supplied. |
 | Comprehension | Define acronyms when useful and check that the owner can explain claimed knowledge. Ask only actual material questions; never supply their answer yourself. |
 | Employer policy | Is a letter requested? Are AI-use and format constraints respected? Resume-only/no-letter requirements override the default two-document workflow. CLI previews do not enforce submission constraints. |
-| Visual/artifact | Observe every requested page. Check typography, whitespace, clipping, signature placement, extraction, word limits, page limits and current-source correspondence. No visual tools means unreviewed visual status. |
+| Visual/artifact | Observe every requested page. Interpret `artifact_audit` using the shared reference. Check typography, whitespace, clipping, signature placement, extraction, word limits, page limits and current-source correspondence. No visual tools means unreviewed visual status. |
 | Freshness | Evidence, answers, JD, policy, letter text, styles, artifacts and final resume are current. Authenticated freshness/release is unavailable; stale notes must be marked manually. |
 
 ## Existing commands

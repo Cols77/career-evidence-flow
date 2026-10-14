@@ -11,6 +11,7 @@ from pypdf import PdfReader
 from pypdf.errors import PdfReadError
 
 from .render import _safe_href
+from .artifact_audit import observe
 
 
 class _DocumentText(HTMLParser):
@@ -93,6 +94,8 @@ def _check_document(path, candidate, policy, kind):
     text = ''
     pages = None
     headings_in_document = []
+    reader = None
+    readable = False
 
     def issue(code, message):
         issues.append({'code': code, 'message': message})
@@ -106,11 +109,13 @@ def _check_document(path, candidate, policy, kind):
             headings_in_document = parsed.headings
             if parsed.unsafe:
                 issue('unsafe_html', 'Document contains active markup or embedded assets.')
+            readable = True
         elif path.suffix.lower() == '.pdf':
             reader = PdfReader(path)
             pages = len(reader.pages)
             text = '\n'.join(page.extract_text() or '' for page in reader.pages)
             headings_in_document = text.splitlines()
+            readable = True
         else:
             issue('unsupported_format', 'Only HTML and PDF documents can be checked.')
     except (OSError, ValueError, PdfReadError, RecursionError, NotImplementedError):
@@ -179,7 +184,8 @@ def _check_document(path, candidate, policy, kind):
     except (ValueError, TypeError):
         issue('invalid_policy', 'Invalid document check policy.')
     return {'status': 'fail' if issues else 'pass', 'issues': issues,
-            'findings': [item['message'] for item in issues], 'word_count': word_count, 'pages': pages}
+            'findings': [item['message'] for item in issues], 'word_count': word_count, 'pages': pages,
+            'artifact_audit': observe(text, reader=reader, readable=readable)}
 
 
 def check(doc_path, candidate, policy=None) -> dict:

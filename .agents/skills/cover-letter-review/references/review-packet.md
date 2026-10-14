@@ -20,7 +20,7 @@ Suggested motivation/company assignment:
 
 Suggested voice/comprehension assignment:
 
-> Independently assess clarity, natural voice, excessive enthusiasm, stock phrasing, jargon and acronym comprehension. Preserve the owner's meaning and actual knowledge. Give concrete editorial findings without an AI-authorship probability or invented comprehension answers.
+> Independently apply the [shared voice criteria](../../application-materials/references/voice-and-artifacts.md) to the actual letter, private writing preferences and any supplied authentic samples. Check acronym comprehension without inventing answers. Return the existing voice/comprehension verdict with exact affected passages.
 
 Suggested visual/artifact assignment:
 

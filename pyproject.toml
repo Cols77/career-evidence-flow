@@ -9,7 +9,7 @@ description = "Agent-led resume and cover-letter workflows with evidence validat
 requires-python = ">=3.11"
 dependencies = [
   "Markdown>=3.7",
-  "pypdf>=5.0",
+  "pypdf>=5.9",
 ]
 
 [project.optional-dependencies]
