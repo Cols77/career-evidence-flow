@@ -18,6 +18,8 @@ The installer refuses an existing `hooks.json` or adapter directory and preserve
 
 Start a fresh **local** Codex session in the workspace. Check `codex features list` for hooks availability, inspect `/hooks`, and explicitly trust the toolkit definitions. If your installed host requires enabling hooks, use its documented feature settings. The installer changes no feature setting, project trust, global configuration or hook trust. Confirm all four skills are discoverable and load one linked reference. Hook trust is separate from project/skill trust. Local hooks do not apply to cloud orchestration, even when it can run local commands. See [official hooks documentation](https://learn.chatgpt.com/docs/hooks).
 
+**Linked worktrees:** In Windows Codex CLI 0.162.1, we observed hook discovery resolve a linked worktree's `.codex/hooks.json` through the corresponding path in the primary checkout. A workspace-only installation can therefore appear absent in `/hooks`. The installer currently writes only inside the selected workspace; affected installations need a separate local activation of the hook configuration at the mapped primary-checkout path. Preserve the commands' original workspace paths, keep that configuration out of Git, and review and trust the discovered definitions through Codex. Recheck the mapped configuration after reinstalling or changing hooks. Confirm native execution using host events and the execution logs.
+
 ## Lifecycle and scope
 
 | Event | Adapter behavior |
