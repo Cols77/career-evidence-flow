@@ -10,7 +10,7 @@ def renderer():
     return importlib.import_module('cv_toolkit.render')
 
 
-@pytest.mark.parametrize('style', ['ats', 'branded', 'letter'])
+@pytest.mark.parametrize('style', ['ats', 'branded', 'modern', 'minimal', 'letter'])
 def test_packaged_styles_render_unicode_and_escape_document_title(style):
     html = renderer().render_html('# Zoë & Example\n\nEngineering experience.', style=style)
     assert '<h1>Zoë &amp; Example</h1>' in html
@@ -37,6 +37,58 @@ def test_inert_links_and_comparison_text_remain_usable():
     html = renderer().render_html('2 < 3 & 5 > 4\n\n[Portfolio](https://example.invalid)')
     assert '2 &lt; 3' in html
     assert 'href="https://example.invalid"' in html
+
+
+@pytest.mark.parametrize('style', ['ats', 'branded', 'modern', 'minimal'])
+def test_resume_groups_dates_without_changing_heading_hierarchy_or_text(style):
+    from cv_toolkit.ats import _DocumentText
+
+    source = ('# Example\n\n## Professional Experience\n\n'
+              '### Undated group\n\nA description.\n\n'
+              '### Northstar **Studio**\n\n*2022–Present*\n\n'
+              '#### Platform Engineer\n\n*2023–Present*\n\n'
+              '- Built a queue.\n\n### Earlier Experience\n\n- Worked on tools.')
+    html = renderer().render_html(source, style=style)
+    assert '<div class="entry-head">\n<h3>Northstar <strong>Studio</strong></h3>' in html
+    assert '<div class="entry-head">\n<h4>Platform Engineer</h4>' in html
+    assert '<h3>Undated group</h3>\n<p>A description.</p>' in html
+    assert '<h3>Earlier Experience</h3>' in html
+    parsed = _DocumentText()
+    parsed.feed(html)
+    assert parsed.headings == ['Example', 'Professional Experience', 'Undated group',
+                               'Northstar Studio', 'Platform Engineer', 'Earlier Experience']
+    assert not parsed.unsafe
+    text = ''.join(parsed.parts)
+    assert text.index('Northstar') < text.index('2022') < text.index('Platform Engineer')
+    assert text.count('Built a queue.') == 1
+
+
+def test_pagebreak_marker_is_layout_only_at_top_level_and_not_in_code_or_prose():
+    html = renderer().render_html('# Example\n\n[pagebreak]\n\n## Education\n\n'
+                                  '`[pagebreak]`\n\nExplain [pagebreak] here.\n\n'
+                                  '> [pagebreak]\n\n```text\n[pagebreak]\n```')
+    assert html.count('<div aria-hidden="true" class="page-break"></div>') == 1
+    assert '<code>[pagebreak]</code>' in html
+    assert 'Explain [pagebreak] here.' in html
+    assert '<blockquote>\n<p>[pagebreak]</p>' in html
+    assert '<code class="language-text">[pagebreak]' in html
+
+
+def test_resume_layout_does_not_change_cover_letter_markup():
+    html = renderer().render_html('### Subject\n\n*Date*\n\n[pagebreak]',
+                                  style='letter', document_kind='cover_letter')
+    assert '<div class="entry-head">' not in html
+    assert '<p>[pagebreak]</p>' in html
+
+
+@pytest.mark.parametrize('source', [
+    '<div class="page-break"></div>',
+    '<div class="entry-head"><h3>Injected</h3></div>',
+    '[pagebreak]\n\n<img src="https://example.invalid/a.png">',
+])
+def test_layout_support_does_not_allow_raw_html(source):
+    with pytest.raises(ValueError, match='unsafe'):
+        renderer().render_html(source)
 
 
 @pytest.mark.parametrize('kwargs', [{'style': '../secret'}, {'document_kind': 'script'}])

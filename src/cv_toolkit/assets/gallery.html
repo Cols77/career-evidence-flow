@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; frame-src 'self' file:; base-uri 'none'; form-action 'none'">
+  <title>Resume Toolkit — visual comparison</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #eeece7; color: #202a30; font: 16px/1.5 Georgia, serif; }
+    header, main { max-width: 1680px; margin: auto; padding: 32px; }
+    header { padding-bottom: 8px; }
+    h1 { font-size: clamp(32px, 4vw, 52px); line-height: 1.1; margin: 10px 0; }
+    .eyebrow { font: 12px/1.5 Consolas, monospace; text-transform: uppercase; letter-spacing: .15em; }
+    header p { max-width: 780px; }
+    nav, .links { display: flex; flex-wrap: wrap; gap: 12px; }
+    a { color: #174363; text-underline-offset: 3px; }
+    a:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+    main { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; }
+    section { padding: 22px; background: #fff; border: 1px solid #d4d4ce; }
+    section h2 { font-size: 27px; margin: 0; }
+    section p { margin: 8px 0 16px; }
+    iframe { display: block; width: 100%; height: 850px; border: 1px solid #d4d4ce; background: white; }
+    @media (max-width: 980px) { main { grid-template-columns: 1fr; } }
+    @media (max-width: 600px) { header, main { padding: 20px 12px; } section { padding: 16px; } }
+  </style>
+</head>
+<body>
+  <header>
+    <p class="eyebrow">Resume Toolkit / Design comparison</p>
+    <h1>One resume. Four perspectives.</h1>
+    <p>Compare the same fictional candidate across three visual themes and a plain ATS option. HTML adapts to the window; open the PDFs to inspect A4 pagination. Use the source and checks beside this page to reproduce the comparison.</p>
+    <p>All content is invented for testing. These are previews, not independently approved applications.</p>
+    <nav aria-label="Styles"><a href="#branded">Editorial</a><a href="#modern">Modern</a><a href="#minimal">Minimal</a><a href="#ats">ATS</a><a href="resume.md">Example source</a><a href="checks.json">Checks</a></nav>
+  </header>
+  <main><!-- cards --></main>
+</body>
+</html>

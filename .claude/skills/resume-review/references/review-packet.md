@@ -22,7 +22,7 @@ Suggested alignment/content assignment:
 
 Suggested voice/comprehension assignment:
 
-> Independently apply the [shared voice criteria](../../application-materials/references/voice-and-artifacts.md) to the actual resume, private writing preferences and any supplied authentic samples. Check acronym comprehension; identify terminology whose owner comprehension needs a material question. Return the existing voice/comprehension verdict with exact affected passages.
+> Independently apply the [shared voice criteria](../../application-materials/references/voice-and-artifacts.md) to the actual resume, private writing preferences and any supplied authentic samples. Check every bullet for an action-led opening and one clear contribution; identify independent contributions to split without separating an action from its methods or result. Check acronym comprehension; identify terminology whose owner comprehension needs a material question. Return the existing voice/comprehension verdict with exact affected passages.
 
 Suggested visual/artifact assignment:
 

@@ -1,0 +1,24 @@
+:root {
+  --paper: #ffffff;
+  --screen: #ededeb;
+  --ink: #171717;
+  --muted: #4c4c4c;
+  --accent: #171717;
+  --line: #bcbcbc;
+  --display-font: "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
+  --body-font: Georgia, "Times New Roman", serif;
+  --utility-font: Georgia, "Times New Roman", serif;
+}
+body { line-height: 1.45; }
+h1 { font-size: 28pt; font-weight: 400; letter-spacing: -0.02em; }
+h1 + p { font-size: 10.5pt; font-weight: 400; font-style: italic; }
+h1 + p + p { border-bottom: 1px solid var(--ink); font-size: 9pt; }
+h2 { font-size: 10pt; letter-spacing: 0.1em; border-bottom-width: 1px; }
+h3 { font-size: 11.5pt; }
+h4 { font-size: 10.5pt; }
+.entry-head p { font-size: 9pt; }
+.entry-head p em { font-style: italic; }
+li::marker { font-size: 0.8em; }
+@media screen and (max-width: 760px) {
+  h1 { font-size: 25pt; }
+}

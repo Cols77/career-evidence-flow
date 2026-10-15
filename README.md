@@ -37,6 +37,14 @@ For a guided colleague-facing setup — Python>=3.11 venv, a private workspace o
 
 ## Try a synthetic example
 
+To compare the packaged **Editorial**, **Modern**, **Minimal** and **ATS** resume designs using one fictional two-page resume:
+
+```powershell
+cv gallery --output outputs/resume-gallery --format both
+```
+
+Open `outputs/resume-gallery/index.html`. Use `--format html` without Chrome/Chromium. For an editable test workspace, run `cv init ../resume-demo --example showcase`. All styles, rendering logic and example data ship with this repository and its wheel. See [resume visuals](docs/resume-visuals.md) for setup, Markdown conventions and verification.
+
 ```powershell
 cv init ../candidate-demo --example developer
 cv validate-evidence --workspace ../candidate-demo

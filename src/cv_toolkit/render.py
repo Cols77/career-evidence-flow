@@ -17,7 +17,8 @@ from pypdf import PdfReader
 from pypdf.errors import PdfReadError
 
 
-STYLES = ('ats', 'branded', 'letter')
+RESUME_STYLES = ('ats', 'branded', 'modern', 'minimal')
+STYLES = (*RESUME_STYLES, 'letter')
 DOCUMENT_KINDS = ('resume', 'cover_letter')
 _RAW_HTML = re.compile(r'<!--|<!|</?[A-Za-z][\w:-]*(?=[\s/>])')
 _TAGS = {'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'ul', 'ol', 'li', 'strong', 'em',
@@ -32,6 +33,9 @@ def _safe_href(value: str) -> bool:
 
 class _MarkupValidator(HTMLParser):
     def handle_starttag(self, tag, attrs):
+        if tag == 'div' and (attrs == [('class', 'entry-head')]
+                             or dict(attrs) == {'class': 'page-break', 'aria-hidden': 'true'}):
+            return
         if tag not in _TAGS:
             raise ValueError('unsafe document markup')
         for key, value in attrs:
@@ -60,13 +64,19 @@ def render_html(markdown_text: str, style: str = 'ats', document_kind: str = 're
         raise ValueError('invalid Markdown input')
     if _RAW_HTML.search(markdown_text):
         raise ValueError('unsafe document markup')
-    content = markdown.markdown(markdown_text, extensions=['fenced_code', 'tables', 'sane_lists'], output_format='html5')
+    extensions = ['fenced_code', 'tables', 'sane_lists']
+    if document_kind == 'resume':
+        from .resume_layout import ResumeLayoutExtension
+        extensions.append(ResumeLayoutExtension())
+    content = markdown.markdown(markdown_text, extensions=extensions, output_format='html5')
     _MarkupValidator(convert_charrefs=True).feed(content)
     heading = re.search(r'^#\s+(.+?)\s*#*\s*$', markdown_text, re.MULTILINE)
     title = heading.group(1) if heading else ('Cover letter' if document_kind == 'cover_letter' else 'Resume')
     assets = resources.files('cv_toolkit').joinpath('assets')
     template = assets.joinpath('template.html').read_text(encoding='utf-8')
     css = assets.joinpath(f'{style}.css').read_text(encoding='utf-8')
+    if style in {'branded', 'modern', 'minimal'}:
+        css = assets.joinpath('resume-layout.css').read_text(encoding='utf-8') + '\n' + css
     return template.format(title=escape(title, quote=True), css=css, content=content, document_kind=document_kind)
 
 

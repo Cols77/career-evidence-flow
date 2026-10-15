@@ -14,3 +14,10 @@ table { width: 100%; border-collapse: collapse; }
 th, td { padding: 4pt; border-bottom: 1px solid #dddddd; text-align: left; }
 pre, code { font-family: monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
 blockquote { margin: 8pt 0; padding-left: 10pt; border-left: 2px solid #cccccc; }
+.entry-head { margin: 9pt 0 4pt; break-after: avoid; break-inside: avoid; }
+.entry-head h3, .entry-head h4 { margin: 0; }
+.entry-head p { margin: 2pt 0 0; }
+.page-break { height: 0; break-before: page; page-break-before: always; }
+@media screen and (max-width: 760px) {
+  article { padding: 20px; }
+}

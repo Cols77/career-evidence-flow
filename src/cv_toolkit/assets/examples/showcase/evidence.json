@@ -1,0 +1,126 @@
+{
+  "schema_version": "1",
+  "candidate_id": "candidate.synthetic-showcase",
+  "items": [
+    {
+      "id": "identity.primary",
+      "kind": "identity",
+      "claims": [
+        {
+          "id": "claim.name",
+          "text": "Alex Example",
+          "status": "confirmed",
+          "publication": "allowed",
+          "sources": [
+            "source.showcase"
+          ]
+        },
+        {
+          "id": "claim.email",
+          "text": "alex@example.invalid",
+          "status": "confirmed",
+          "publication": "allowed",
+          "sources": [
+            "source.showcase"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "item.0",
+      "kind": "project",
+      "label": "Professional Summary",
+      "claims": [
+        {
+          "id": "claim.section.0",
+          "text": "Platform engineer who turns difficult operational workflows into dependable software. Combines backend development, observability and practical tooling for small engineering teams. This fictional profile demonstrates resume layout and extraction; every employer, achievement and qualification below is invented for testing.",
+          "status": "confirmed",
+          "publication": "allowed",
+          "sources": [
+            "source.showcase"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "item.1",
+      "kind": "project",
+      "label": "Core Skills",
+      "claims": [
+        {
+          "id": "claim.section.1",
+          "text": "- **Engineering:** Python, Go, SQL, HTTP APIs, asynchronous workers and service integration\n- **Platform:** Linux, containers, PostgreSQL, infrastructure configuration and delivery pipelines\n- **Practice:** Incident analysis, technical writing, accessible interfaces and collaborative design",
+          "status": "confirmed",
+          "publication": "allowed",
+          "sources": [
+            "source.showcase"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "item.2",
+      "kind": "experience",
+      "label": "Professional Experience",
+      "claims": [
+        {
+          "id": "claim.section.2",
+          "text": "### Northstar Workshop — Sample City\n\n*March 2021 – December 2025*\n\n#### Senior Platform Engineer\n\n*January 2023 – December 2025*\n\n- Led a four-person team building a shared job-processing service for inventory and scheduling applications; documented ownership, retry behavior and recovery procedures before launch.\n- Reduced failed nightly imports from 18 to 3 per month by adding schema validation, bounded retries and clear operator alerts across five data feeds.\n- Designed a PostgreSQL migration workflow that verified backups and rehearsed rollback steps in staging before each scheduled production change.\n- Added service-level dashboards and trace correlation so support engineers could follow a request across the API, queue and worker without searching separate logs.\n- Wrote incident walkthroughs and paired with new team members on operational changes, helping the team distribute knowledge beyond its original maintainers.\n\n#### Software Engineer\n\n*March 2021 – December 2022*\n\n- Built Python and Go services connecting workshop booking, stock tracking and dispatch tools, with contract tests at each integration boundary.\n- Created a command-line release checklist that checked configuration and database compatibility before a deployment, replacing an error-prone manual procedure.\n- Worked with support staff to simplify error messages and expose actionable recovery steps in the internal administration interface.\n\n\n\n### Harbor Systems — Example Town\n\n*September 2017 – February 2021*\n\n#### Backend Engineer\n\n- Maintained scheduling APIs used by regional service teams, including capacity rules, cancellation handling and audit histories for customer-support queries.\n- Introduced deterministic integration fixtures that reproduced daylight-saving and duplicate-message failures before releases reached users.\n- Reworked batch reports into incremental SQL queries, reducing the daily reporting window from 45 to 12 minutes on the same test dataset and hardware.\n- Partnered with a designer to improve keyboard navigation and validation feedback in the team's internal dispatch application.\n\n### Earlier Experience\n\n- **Software Engineering Intern, Cedar Lab** — June–August 2017: built a local Python tool for reconciling equipment records and wrote setup instructions for the operations team.\n- **Student Developer, Community Archive** — October 2015–May 2017: helped a volunteer team catalogue scanned documents and add search to a small public collection.",
+          "status": "confirmed",
+          "publication": "allowed",
+          "sources": [
+            "source.showcase"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "item.3",
+      "kind": "project",
+      "label": "Selected Projects",
+      "claims": [
+        {
+          "id": "claim.section.3",
+          "text": "### Queue Observatory\n\n- Built an open demonstration of queue backlogs, retries and dead-letter handling using generated workloads. Includes repeatable scenarios and a guide explaining the trade-offs behind each recovery strategy.\n\n### Repair Library\n\n- Developed a local-first prototype for tracking shared tools and repair notes. Tested the workflow with fictional records; it has not been deployed as a production service.",
+          "status": "confirmed",
+          "publication": "allowed",
+          "sources": [
+            "source.showcase"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "item.4",
+      "kind": "project",
+      "label": "Education",
+      "claims": [
+        {
+          "id": "claim.section.4",
+          "text": "- **BSc Computer Science** — Example Institute of Technology, 2013–2017\n- **Distributed Systems Workshop** — Sample Learning Centre, 2024",
+          "status": "confirmed",
+          "publication": "allowed",
+          "sources": [
+            "source.showcase"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "item.5",
+      "kind": "project",
+      "label": "Community",
+      "claims": [
+        {
+          "id": "claim.section.5",
+          "text": "- Hosted monthly code-reading sessions for a fictional local engineering group, focusing on testing, maintenance and readable documentation.",
+          "status": "confirmed",
+          "publication": "allowed",
+          "sources": [
+            "source.showcase"
+          ]
+        }
+      ]
+    }
+  ]
+}

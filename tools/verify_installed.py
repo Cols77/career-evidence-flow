@@ -18,7 +18,7 @@ def main(argv=None):
     args = parser.parse_args(argv)
     import cv_toolkit
     from cv_toolkit import ats, letter_check
-    from cv_toolkit.render import render_pdf
+    from cv_toolkit.render import RESUME_STYLES, render_pdf
 
     imported = Path(cv_toolkit.__file__).resolve()
     assert not imported.is_relative_to(args.source_checkout.resolve()), 'source checkout import'
@@ -54,7 +54,7 @@ def main(argv=None):
                         if '://' not in link and not link.startswith('#'):
                             target = (page.parent / link.split('#')[0]).resolve()
                             assert target.is_relative_to(root) and target.is_file(), 'broken installed skill reference'
-        for kind, source, styles in [('resume', 'resume.md', ('ats', 'branded')), ('cover_letter', 'letter.md', ('letter',))]:
+        for kind, source, styles in [('resume', 'resume.md', RESUME_STYLES), ('cover_letter', 'letter.md', ('letter',))]:
             for style in styles:
                 relative = f'outputs/{kind}-{style}.html'
                 command('render', '--workspace', str(root), '--source', source, '--output', relative, '--kind', kind, '--style', style)
@@ -75,6 +75,12 @@ def main(argv=None):
         state = command('status', '--workspace', str(root), '--application', 'applications/synthetic-role')
         assert state['readiness'] == 'draft_only' and state['release_available'] is False
         report['profiles'].append(profile)
+    gallery = args.output / 'visual-gallery'
+    command('gallery', '--output', str(gallery), '--format', 'both')
+    report['gallery_checks'] = json.loads((gallery / 'checks.json').read_text(encoding='utf-8'))
+    assert set(report['gallery_checks']) == set(RESUME_STYLES)
+    assert all(check['pdf']['pages'] == 2 and check['pdf_matches_html']
+               for check in report['gallery_checks'].values()), 'gallery content or pagination changed'
     (args.output / 'installed-results.json').write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
     print(json.dumps(report, sort_keys=True))
 

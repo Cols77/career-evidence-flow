@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "id": "projection.showcase",
+  "label": "Fictional visual showcase",
+  "sections": [
+    {
+      "id": "section.identity",
+      "label": "Contact",
+      "item_ids": [
+        "identity.primary"
+      ],
+      "claim_ids": [
+        "claim.name",
+        "claim.email"
+      ]
+    },
+    {
+      "id": "section.0",
+      "label": "Professional Summary",
+      "item_ids": [
+        "item.0"
+      ],
+      "claim_ids": [
+        "claim.section.0"
+      ]
+    },
+    {
+      "id": "section.1",
+      "label": "Core Skills",
+      "item_ids": [
+        "item.1"
+      ],
+      "claim_ids": [
+        "claim.section.1"
+      ]
+    },
+    {
+      "id": "section.2",
+      "label": "Professional Experience",
+      "item_ids": [
+        "item.2"
+      ],
+      "claim_ids": [
+        "claim.section.2"
+      ]
+    },
+    {
+      "id": "section.3",
+      "label": "Selected Projects",
+      "item_ids": [
+        "item.3"
+      ],
+      "claim_ids": [
+        "claim.section.3"
+      ]
+    },
+    {
+      "id": "section.4",
+      "label": "Education",
+      "item_ids": [
+        "item.4"
+      ],
+      "claim_ids": [
+        "claim.section.4"
+      ]
+    },
+    {
+      "id": "section.5",
+      "label": "Community",
+      "item_ids": [
+        "item.5"
+      ],
+      "claim_ids": [
+        "claim.section.5"
+      ]
+    }
+  ]
+}

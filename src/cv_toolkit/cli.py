@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 import tempfile
 
-from .bootstrap import init_workspace, install_skills, install_entry_hook
+from .bootstrap import EXAMPLES, init_workspace, install_skills, install_entry_hook
 from .evidence import build_source_registry, claim_index, load_evidence
 from .records import ToolkitError, confined, load_json
 from .workspace import Workspace
@@ -40,12 +40,18 @@ def _profile(workspace, evidence=None, registry=None):
 
 
 def _parser():
+    from .render import STYLES
+
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest='command', required=True)
     init = sub.add_parser('init', help='Create an empty private workspace or a synthetic example')
     init.add_argument('directory', type=Path)
     init.add_argument('--name', default='Candidate')
-    init.add_argument('--example', choices=('developer', 'researcher'))
+    init.add_argument('--example', choices=EXAMPLES)
+    gallery = sub.add_parser('gallery', help='Render a fictional resume in every packaged resume style')
+    gallery.add_argument('--output', type=Path, required=True, help='New directory for the comparison')
+    gallery.add_argument('--format', choices=('html', 'both'), default='html',
+                         help='HTML comparison, optionally with PDF previews (requires Chromium)')
     for command in ('onboard', 'validate-evidence', 'validate-projection', 'render', 'check', 'install-skills', 'install-hooks', 'create-application', 'status', 'answer', 'resolve-question', 'workflow-checkpoint', 'workflow-status'):
         item = sub.add_parser(command)
         item.add_argument('--workspace', type=Path, required=True)
@@ -65,7 +71,7 @@ def _parser():
             item.add_argument('--source', required=True)
             item.add_argument('--output', required=True)
             item.add_argument('--format', choices=('html', 'pdf'), default='html')
-            item.add_argument('--style', choices=('ats', 'branded', 'letter'), default='ats')
+            item.add_argument('--style', choices=STYLES, default='ats')
             item.add_argument('--kind', choices=('resume', 'cover_letter'), default='resume')
         if command == 'check':
             item.add_argument('--document', required=True)
@@ -102,6 +108,9 @@ def main(argv=None):
         if args.command == 'init':
             init_workspace(args.directory, name=args.name, example=args.example)
             result['synthetic'] = args.example is not None
+        elif args.command == 'gallery':
+            from .gallery import render_gallery
+            result.update(render_gallery(args.output, include_pdf=args.format == 'both'))
         elif args.command == 'onboard':
             from .onboarding import classify
             state = classify(args.workspace)

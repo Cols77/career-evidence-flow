@@ -9,12 +9,13 @@ from .records import ToolkitError, confined, nonempty
 
 
 SKILLS = ('experience-capture', 'application-materials', 'resume-review', 'cover-letter-review')
+EXAMPLES = ('developer', 'researcher', 'showcase')
 
 
 def init_workspace(root, *, name='Candidate', example=None):
     root = Path(root)
     nonempty(name, 'candidate name')
-    if example not in {None, 'developer', 'researcher'}:
+    if example is not None and example not in EXAMPLES:
         raise ToolkitError('invalid example')
     if root.exists() and (not root.is_dir() or any(root.iterdir())):
         raise ToolkitError('workspace must be empty')
