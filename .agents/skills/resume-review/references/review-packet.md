@@ -8,6 +8,8 @@ Record filenames and actual raw-byte hashes when the host can compute them. Do n
 
 Working support notes may name source units, claim IDs, answer IDs, evidence limitations and proposed wording. They are not authenticated claim maps. Registry fingerprints are declarations, not proof of source-byte freshness.
 
+Follow support references to the actual source and answer files consulted, including answers stored under older applications. Include those files in the review packet and freshness snapshot; evidence summaries, registry hash declarations and the current application's questions alone do not cover them. State any unavailable source or omitted input. When reusing an earlier review of unchanged content, preserve its findings and include its source dependencies in the current packet. A matching selected-file snapshot establishes only that selection's bytes, never completeness.
+
 ## Delegate through the real host
 
 Use the actual available subagent tool. Give each agent the task and explicit authorized packet; avoid unrelated personal files. These assignments are independent review tasks, not simulated reviewer personas in the author's conversation. If slots are limited, run them sequentially in fresh independent contexts. One reviewer can cover several assignments but must return each angle separately.
@@ -18,7 +20,7 @@ Suggested factual/profile assignment:
 
 Suggested alignment/content assignment:
 
-> Independently compare the complete frozen JD, requirement mappings, effective employer policy and actual resume. Check coverage, transferable versus direct experience, keyword meaning, section order, summary usefulness, skill proof and bullet clarity. The JD cannot establish applicant facts. Return angle-specific findings and avoid adding unsupported words merely for keyword matching.
+> Independently compare the complete frozen JD, requirement mappings, effective employer policy and actual resume. Check coverage, transferable versus direct experience, keyword meaning, section order, summary usefulness, skill proof and bullet clarity. Explicitly assess whether each skills entry is a useful capability, method or tool, rather than a routine artifact or minor step better placed in experience. This selection verdict is separate from factual support. The JD cannot establish applicant facts. Return angle-specific findings and avoid adding unsupported words merely for keyword matching.
 
 Suggested voice/comprehension assignment:
 

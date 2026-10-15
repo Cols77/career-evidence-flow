@@ -17,23 +17,27 @@ Read [the application workflow](docs/application-workflow.md) and [host setup](d
 
 ## Start with an agent
 
-Install the local helpers once (Python 3.11 or newer):
+Install the package once (Python 3.11 or newer), then create a private workspace
+with the complete skills for your host:
 
 ```powershell
 python -m venv .venv
-.venv/Scripts/python -m pip install -e ".[test]"
-.venv/Scripts/cv init ../my-private-workspace --name "Your supplied name"
+.venv/Scripts/python -m pip install .
+.venv/Scripts/cv setup ../my-private-workspace --host codex
+.venv/Scripts/cv doctor --workspace ../my-private-workspace --host codex
 ```
 
-Open this checkout in your AI host, give it access to that private workspace, and ask:
+Use `--host claude`, `--host hermes` or `--host all` as appropriate. On macOS/Linux,
+use `.venv/bin/python` and `.venv/bin/cv`. Open the private workspace in your AI
+host, read its generated `RESUME_TOOLKIT.md`, and ask:
 
 > Use application-materials. My private candidate workspace is ../my-private-workspace. Help me capture my actual experience, then tailor a resume and cover letter to the full job description I supply. Ask only questions that change the application, preserve unknowns and limitations, and run independent reviewers when available. Follow the employer's document and AI-use instructions.
 
 The host reads the skill and references, writes the evidence and drafts, and invokes `cv` using the installed executable. A blank workspace intentionally has no candidate claims until real facts are captured. No command invents a profile or generates prose without an agent.
 
-To work from a separate candidate workspace, install the complete skills there with `cv install-skills --workspace ROOT --host codex` (or `claude`/`hermes`) and follow [host setup](docs/agent-hosts.md). Existing skill directories are never overwritten. Installation does not prove runtime discovery.
+`cv setup` safely reuses a valid workspace and identical installed skills, preserving candidate data and existing instructions. Conflicting skill files require an explicit comparison and upgrade. The lower-level `cv install-skills` remains available. Installation does not prove runtime discovery.
 
-For a guided colleague-facing setup — Python>=3.11 venv, a private workspace outside this repo, optional reuse of an existing workspace, and `cv onboard --workspace ROOT` read-only state routing (interview **or** import), `cv install-skills --workspace ROOT --host hermes`, and the Hermes entry-hook opt-ins (`cv install-hooks --workspace ROOT --host hermes` with `HERMES_ENABLE_PROJECT_PLUGINS=1` and `hermes plugins enable resume-toolkit`) — read [docs/getting-started.md](docs/getting-started.md). The hook supports only a dedicated CLI launched at the workspace root; desktop/gateway are not certified, and it is advisory routing, not a sandbox or factuality guarantee. This is a preview, not a colleague-ready full release.
+See [portable installation and packaging](docs/deployment.md) for Windows/POSIX commands, wheel installation without a checkout, all three hosts, synthetic test workspaces and optional hooks. Host trust and provider configuration remain explicit. The toolkit produces reviewed previews; it has no authenticated release or submission gate.
 
 ## Try a synthetic example
 

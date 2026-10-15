@@ -6,6 +6,7 @@ from pathlib import Path
 import tempfile
 
 from .bootstrap import EXAMPLES, init_workspace, install_skills, install_entry_hook
+from .deployment import DeploymentError
 from .evidence import build_source_registry, claim_index, load_evidence
 from .records import ToolkitError, confined, load_json
 from .workspace import Workspace
@@ -48,6 +49,14 @@ def _parser():
     init.add_argument('directory', type=Path)
     init.add_argument('--name', default='Candidate')
     init.add_argument('--example', choices=EXAMPLES)
+    setup = sub.add_parser('setup', help='Initialize or reuse a private workspace and install complete host skills')
+    setup.add_argument('directory', type=Path)
+    setup.add_argument('--host', choices=('codex', 'claude', 'hermes', 'all'), required=True)
+    setup.add_argument('--name', default='Candidate')
+    setup.add_argument('--example', choices=EXAMPLES)
+    doctor = sub.add_parser('doctor', help='Read-only checks of workspace, host skills and local prerequisites')
+    doctor.add_argument('--workspace', type=Path, required=True)
+    doctor.add_argument('--host', choices=('codex', 'claude', 'hermes', 'all'), default='all')
     gallery = sub.add_parser('gallery', help='Render a fictional resume in every packaged resume style')
     gallery.add_argument('--output', type=Path, required=True, help='New directory for the comparison')
     gallery.add_argument('--format', choices=('html', 'both'), default='html',
@@ -108,6 +117,12 @@ def main(argv=None):
         if args.command == 'init':
             init_workspace(args.directory, name=args.name, example=args.example)
             result['synthetic'] = args.example is not None
+        elif args.command == 'setup':
+            from .deployment import setup
+            result.update(setup(args.directory, host=args.host, name=args.name, example=args.example))
+        elif args.command == 'doctor':
+            from .deployment import doctor
+            result.update(doctor(args.workspace, host=args.host))
         elif args.command == 'gallery':
             from .gallery import render_gallery
             result.update(render_gallery(args.output, include_pdf=args.format == 'both'))
@@ -191,6 +206,8 @@ def main(argv=None):
                 from .questions import resolve_question
                 evidence, registry = _profile(ws, args.evidence, args.registry)
                 resolve_question(confined(ws.root, args.questions), args.question_id, load_json(confined(ws.root, args.resolution)), evidence, registry, status=args.status)
+    except DeploymentError as exc:
+        result = {'command': args.command, 'status': 'invalid', 'error': str(exc)}
     except (ValueError, OSError, RuntimeError, RecursionError, OverflowError):
         result = {'command': args.command, 'status': 'invalid', 'error': 'validation or local operation failed'}
     print(json.dumps(result, sort_keys=True, separators=(',', ':')))

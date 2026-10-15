@@ -2,6 +2,12 @@
 
 `skills/` is the single authored source. `tools/sync_skills.py` generates complete copies into the package and the repository's native host directories. Supporting references travel with each skill; no installed skill depends on this checkout being present. See [the application workflow](application-workflow.md).
 
+For a fresh or existing private workspace, use `cv setup ROOT --host codex`,
+`--host claude`, `--host hermes` or `--host all`, then
+`cv doctor --workspace ROOT --host HOST`. See [portable deployment](deployment.md)
+for package installation, repeatable setup and distribution builds. The commands
+install/check local files; they do not verify native discovery or review execution.
+
 ## Codex
 
 Launch Codex from this checkout. Its project copies are in `.agents/skills/`; explicitly request `$application-materials` or ask it to use that skill. `AGENTS.md` also provides a manual entrypoint. Codex documents repository discovery in `.agents/skills` from the current directory to the repository root. See [official OpenAI documentation](https://learn.chatgpt.com/docs/build-skills).

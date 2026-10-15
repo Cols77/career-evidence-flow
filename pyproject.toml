@@ -4,8 +4,9 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "resume-toolkit"
-version = "0.1.0"
+version = "0.2.0"
 description = "Agent-led resume and cover-letter workflows with evidence validation and document tools"
+readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
   "Markdown>=3.7",
@@ -14,6 +15,7 @@ dependencies = [
 
 [project.optional-dependencies]
 test = ["pytest>=8.0"]
+dev = ["pytest>=8.0", "build>=1.2"]
 
 [project.scripts]
 cv = "cv_toolkit.cli:main"

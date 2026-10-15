@@ -1,0 +1,9 @@
+# Source releases are installable package source, not candidate workspaces.
+prune tests
+prune docs
+prune tools
+prune outputs
+prune .agents
+prune .claude
+prune .hermes
+global-exclude *.py[cod] __pycache__ .env

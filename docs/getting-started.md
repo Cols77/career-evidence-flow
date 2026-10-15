@@ -1,5 +1,10 @@
 # Fresh setup and Hermes entry routing
 
+For the current, shorter installation path across **Codex, Claude Code and
+Hermes**, start with [portable deployment](deployment.md): install the wheel or
+package, run `cv setup ROOT --host HOST`, then `cv doctor`. The explicit steps
+below explain the lower-level Hermes commands and optional hook activation.
+
 This is a colleague-facing guide for standing up a private candidate workspace
 with the toolkit's Python helpers, then opting the workspace into Hermes entry
 routing. Python supplies validators, records and rendering. Your chosen AI host

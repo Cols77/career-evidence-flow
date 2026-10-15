@@ -4,6 +4,7 @@ Produces unreviewed synthetic preview artifacts, never production approvals.
 Requires locally installed Chrome/Chromium for the sequential PDF matrix.
 """
 import argparse
+import hashlib
 import json
 from pathlib import Path
 import re
@@ -23,17 +24,52 @@ def main(argv=None):
     imported = Path(cv_toolkit.__file__).resolve()
     assert not imported.is_relative_to(args.source_checkout.resolve()), 'source checkout import'
     assert imported.is_relative_to(Path(sys.prefix).resolve()), 'package is not in this environment'
+    assert not Path.cwd().resolve().is_relative_to(args.source_checkout.resolve()), 'run from outside the checkout'
+    args.output = args.output.resolve()
+    assert not args.output.is_relative_to(args.source_checkout.resolve()), 'acceptance output must be outside the checkout'
     assert (Path(sys.prefix) / 'Scripts/cv.exe').is_file() if sys.platform == 'win32' else (Path(sys.prefix) / 'bin/cv').is_file()
     executable = Path(sys.prefix) / ('Scripts/cv.exe' if sys.platform == 'win32' else 'bin/cv')
-    args.output.mkdir(parents=True, exist_ok=True)
-    report = {'status': 'ok', 'installed_package': str(imported), 'profiles': [], 'pdf_checks': [], 'host_runtime_discovery': 'unverified', 'review_status': 'unreviewed_preview'}
+    args.output.mkdir(parents=True, exist_ok=False)
+    report = {'status': 'ok', 'version': cv_toolkit.__version__, 'installed_package': str(imported),
+              'deployments': [], 'profiles': [], 'pdf_checks': [],
+              'host_runtime_discovery': 'unverified', 'review_status': 'unreviewed_preview'}
 
     def command(*parts):
         result = subprocess.run([str(executable), *parts], cwd=args.output, capture_output=True, text=True)
-        assert result.returncode == 0, 'installed console command failed'
+        assert result.returncode == 0, f'installed console command failed: {parts}\n{result.stdout}\n{result.stderr}'
         record = json.loads(result.stdout)
         assert record['status'] == 'ok'
         return record
+
+    def snapshot(root):
+        return {path.relative_to(root).as_posix():
+                (hashlib.sha256(path.read_bytes()).hexdigest(), path.stat().st_mtime_ns)
+                for path in root.rglob('*') if path.is_file()}
+
+    prefixes = {'codex': '.agents/skills', 'claude': '.claude/skills', 'hermes': '.hermes/skills'}
+    for host in (*prefixes, 'all'):
+        root = args.output / f'setup-{host}'
+        first = command('setup', str(root), '--host', host)
+        selected = set(prefixes) if host == 'all' else {host}
+        assert first['initialized'] is True and first['runtime_discovery_verified'] is False
+        assert first['hooks_changed'] is False and first['hooks_installed_by_setup'] is False
+        assert set(first['hosts']) == selected
+        for item, prefix in prefixes.items():
+            assert (root / prefix).is_dir() == (item in selected), 'setup installed an unrequested host'
+        before = snapshot(root)
+        repeated = command('setup', str(root), '--host', host)
+        assert repeated['initialized'] is False and repeated['profile_preserved'] is True
+        assert all(entry['skills'] == 'unchanged' for entry in repeated['hosts'].values())
+        diagnosis = command('doctor', '--workspace', str(root), '--host', host)
+        assert diagnosis['runtime_discovery_verified'] is False
+        assert diagnosis['hook_execution_verified'] is False
+        assert diagnosis['independent_review_verified'] is False
+        assert snapshot(root) == before, 'setup repeat or doctor changed existing workspace files'
+        for item in selected:
+            assert any(check['id'] == f'skills.{item}' and check['status'] == 'pass'
+                       for check in diagnosis['checks'])
+        report['deployments'].append({'host': host, 'repeat_setup': 'unchanged',
+                                      'doctor_read_only': True, 'diagnostics': diagnosis['checks']})
 
     for profile in ('developer', 'researcher'):
         root = args.output / profile
@@ -44,7 +80,7 @@ def main(argv=None):
             record = command('install-skills', '--workspace', str(root), '--host', host)
             assert record['skill_count'] == 4
             assert record['runtime_discovery_verified'] is False
-            prefix = {'codex': '.agents/skills', 'claude': '.claude/skills', 'hermes': '.hermes/skills'}[host]
+            prefix = prefixes[host]
             for skill in ('experience-capture', 'application-materials', 'resume-review', 'cover-letter-review'):
                 folder = root / prefix / skill
                 pages = list(folder.rglob('*.md'))
@@ -54,6 +90,19 @@ def main(argv=None):
                         if '://' not in link and not link.startswith('#'):
                             target = (page.parent / link.split('#')[0]).resolve()
                             assert target.is_relative_to(root) and target.is_file(), 'broken installed skill reference'
+        # Upgrade a populated workspace created through the existing init/install
+        # commands, then rerun setup without changing evidence or instructions.
+        profile_before = snapshot(root / 'profile')
+        command('setup', str(root), '--host', 'all')
+        assert snapshot(root / 'profile') == profile_before, 'setup replaced existing synthetic profile'
+        before = snapshot(root)
+        conflicting = subprocess.run([str(executable), 'setup', str(root), '--host', 'all', '--example', 'showcase'],
+                                     cwd=args.output, capture_output=True, text=True)
+        assert conflicting.returncode != 0, 'setup accepted a replacement example for an existing profile'
+        assert snapshot(root) == before, 'rejected example replacement changed the workspace'
+        command('setup', str(root), '--host', 'all')
+        command('doctor', '--workspace', str(root), '--host', 'all')
+        assert snapshot(root) == before, 'existing workspace initialization is not idempotent'
         for kind, source, styles in [('resume', 'resume.md', RESUME_STYLES), ('cover_letter', 'letter.md', ('letter',))]:
             for style in styles:
                 relative = f'outputs/{kind}-{style}.html'
