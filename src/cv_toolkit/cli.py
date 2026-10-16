@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 import tempfile
 
-from .bootstrap import EXAMPLES, init_workspace, install_skills, install_entry_hook
+from .bootstrap import EXAMPLES, WorkspaceBindingError, init_workspace, install_skills, install_entry_hook
 from .deployment import DeploymentError
 from .evidence import build_source_registry, claim_index, load_evidence
 from .records import ToolkitError, confined, load_json
@@ -54,9 +54,11 @@ def _parser():
     setup.add_argument('--host', choices=('codex', 'claude', 'hermes', 'all'), required=True)
     setup.add_argument('--name', default='Candidate')
     setup.add_argument('--example', choices=EXAMPLES)
+    setup.add_argument('--project-root', type=Path, help='Explicit host discovery root containing the data workspace')
     doctor = sub.add_parser('doctor', help='Read-only checks of workspace, host skills and local prerequisites')
     doctor.add_argument('--workspace', type=Path, required=True)
     doctor.add_argument('--host', choices=('codex', 'claude', 'hermes', 'all'), default='all')
+    doctor.add_argument('--project-root', type=Path, help='Explicit host discovery root containing the data workspace')
     gallery = sub.add_parser('gallery', help='Render a fictional resume in every packaged resume style')
     gallery.add_argument('--output', type=Path, required=True, help='New directory for the comparison')
     gallery.add_argument('--format', choices=('html', 'both'), default='html',
@@ -88,6 +90,7 @@ def _parser():
             item.add_argument('--policy', help='Workspace-relative effective policy JSON')
         if command in ('install-skills', 'install-hooks'):
             item.add_argument('--host', choices=('codex', 'claude', 'hermes'), required=True)
+            item.add_argument('--project-root', type=Path, help='Explicit host discovery root containing the data workspace')
         if command == 'create-application':
             item.add_argument('--slug', required=True)
             item.add_argument('--job', required=True, help='Workspace-relative full supplied job text file')
@@ -119,10 +122,10 @@ def main(argv=None):
             result['synthetic'] = args.example is not None
         elif args.command == 'setup':
             from .deployment import setup
-            result.update(setup(args.directory, host=args.host, name=args.name, example=args.example))
+            result.update(setup(args.directory, host=args.host, name=args.name, example=args.example, project_root=args.project_root))
         elif args.command == 'doctor':
             from .deployment import doctor
-            result.update(doctor(args.workspace, host=args.host))
+            result.update(doctor(args.workspace, host=args.host, project_root=args.project_root))
         elif args.command == 'gallery':
             from .gallery import render_gallery
             result.update(render_gallery(args.output, include_pdf=args.format == 'both'))
@@ -133,7 +136,7 @@ def main(argv=None):
                           guidance=state.as_context()['context'])
             result['status'] = 'invalid' if state.state == 'malformed' else 'ok'
         elif args.command == 'install-hooks':
-            result['file_count'] = install_entry_hook(args.workspace, args.host)
+            result['file_count'] = install_entry_hook(args.workspace, args.host, project_root=args.project_root)
             result['runtime_discovery_verified'] = False
         elif args.command in ('workflow-checkpoint', 'workflow-status'):
             from .codex_hooks import checkpoint_status, record_checkpoint
@@ -152,7 +155,7 @@ def main(argv=None):
                 record = load_projection(confined(ws.root, args.projection or _profile_path(ws, 'projection.json')), evidence, registry)
                 result['section_count'] = len(record['sections'])
             elif args.command == 'install-skills':
-                result['skill_count'] = install_skills(ws.root, args.host)
+                result['skill_count'] = install_skills(ws.root, args.host, project_root=args.project_root)
                 result['runtime_discovery_verified'] = False
 
             elif args.command == 'render':
@@ -206,7 +209,7 @@ def main(argv=None):
                 from .questions import resolve_question
                 evidence, registry = _profile(ws, args.evidence, args.registry)
                 resolve_question(confined(ws.root, args.questions), args.question_id, load_json(confined(ws.root, args.resolution)), evidence, registry, status=args.status)
-    except DeploymentError as exc:
+    except (DeploymentError, WorkspaceBindingError) as exc:
         result = {'command': args.command, 'status': 'invalid', 'error': str(exc)}
     except (ValueError, OSError, RuntimeError, RecursionError, OverflowError):
         result = {'command': args.command, 'status': 'invalid', 'error': 'validation or local operation failed'}

@@ -49,7 +49,7 @@ def test_install_hook_refuses_overwrite_and_leaves_existing(tmp_path):
 
 def test_install_hook_rejects_other_hosts(tmp_path):
     with pytest.raises(ToolkitError):
-        install_entry_hook(tmp_path, "claude")
+        install_entry_hook(tmp_path, "unsupported")
     assert not (tmp_path / ".hermes/plugins" / HOOK_NAME).exists()
 
 
@@ -86,15 +86,18 @@ def _dispatch_driver():
     )
 
 
+@pytest.mark.parametrize('child_workspace', [False, True])
 def test_real_hermes_dispatch_routes_workspace_state(
-    tmp_path, hermes_python, monkeypatch
+    tmp_path, hermes_python, monkeypatch, child_workspace
 ):
     # A private toolkit workspace with empty default candidate -> interview/import.
     from cv_toolkit.bootstrap import init_workspace
     from cv_toolkit.onboarding import classify
 
-    ws = init_workspace(tmp_path / "ws", name="Candidate")
-    install_entry_hook(tmp_path / "ws", "hermes")
+    project = tmp_path / 'project'
+    project.mkdir()
+    ws = init_workspace(project / 'user-profile' if child_workspace else project, name="Candidate")
+    install_entry_hook(ws, "hermes", project_root=project if child_workspace else None)
 
     home = tmp_path / "home"
     home.mkdir()
@@ -116,7 +119,7 @@ def test_real_hermes_dispatch_routes_workspace_state(
 
     proc = subprocess.run(
         [hermes_python, str(driver)],
-        cwd=str(ws),  # discovery reads ./.hermes/plugins relative to cwd
+        cwd=str(project),  # native discovery runs at the explicit project root
         env=env, capture_output=True, text=True, timeout=120,
     )
     assert proc.returncode == 0, proc.stderr
@@ -126,6 +129,7 @@ def test_real_hermes_dispatch_routes_workspace_state(
     found = [r for r in results if isinstance(r, dict) and r.get("context")]
     assert found, f"pre_llm_call returned no context: {results!r}"
     context = found[0]["context"]
+    assert str(ws) in context
     assert "experience-capture" in context
     assert "INTERVIEW" in context or "interview" in context.lower()
     api_line = next(l for l in proc.stdout.splitlines() if l.startswith('API_CONTENT='))

@@ -17,8 +17,8 @@ Windows PowerShell:
 ```powershell
 python -m venv .venv
 .venv\Scripts\python -m pip install .
-.venv\Scripts\cv setup ..\my-private-cv --host codex
-.venv\Scripts\cv doctor --workspace ..\my-private-cv --host codex
+.venv\Scripts\cv setup user-profile --host all --project-root .
+.venv\Scripts\cv doctor --workspace user-profile --host all --project-root .
 ```
 
 macOS/Linux:
@@ -26,8 +26,8 @@ macOS/Linux:
 ```sh
 python3 -m venv .venv
 .venv/bin/python -m pip install .
-.venv/bin/cv setup ../my-private-cv --host codex
-.venv/bin/cv doctor --workspace ../my-private-cv --host codex
+.venv/bin/cv setup user-profile --host all --project-root .
+.venv/bin/cv doctor --workspace user-profile --host all --project-root .
 ```
 
 Use `--host claude`, `--host hermes` or `--host all` with both commands. Keep this
@@ -48,10 +48,24 @@ are already available. The project has not been published to PyPI; an unqualifie
 
 ## Use a neutral private workspace
 
-Use a candidate-level directory such as `my-private-cv`, outside this public
-repository. It owns `profile/`, `applications/<job>/` and Git-ignored
-`outputs/<job>/<revision>/`. Do not put the master profile inside the first
-employer's application directory.
+The default clone layout uses Git-ignored `user-profile/` in this repository.
+It owns `profile/`, `applications/<job>/`, `intake/` and
+`outputs/<job>/<revision>/`. Its evidence, registry, projection and application
+records use the same standard format as `cv init`; no personal adapter or second
+repository is required. Do not put the master profile inside an employer's
+application directory. Keep a separate backup of this ignored folder.
+
+`--project-root .` installs host files at the repository root and binds them to
+the selected child data workspace in ignored `.local/resume-toolkit/project.json`.
+The generated local `RESUME_TOOLKIT.md` pins the interpreter and both roots.
+Use its commands to avoid accidentally loading an older global `cv` installation.
+Setup refuses silent rebinding; inspect the old local configuration before
+deliberately replacing it. The data workspace must be the project root or a
+contained child. Existing candidate records are preserved.
+
+An external private workspace remains supported, including with a wheel and no
+checkout: `cv setup /private/my-cv --host all`. Omit `--project-root` when data
+and host files share that root. Verify ignore rules before adding real data.
 
 `cv setup` initializes an empty directory, or reuses an existing valid toolkit
 workspace while preserving its candidate records. Repeating setup with identical
@@ -80,7 +94,7 @@ cv gallery --output ../resume-demo/outputs/gallery --format both
 Use `--format html` if no browser is installed. Synthetic records demonstrate
 the toolkit; they must never be treated as evidence about a real candidate.
 
-## Start the host in the workspace
+## Start the host in the project
 
 | Host | Workspace skills | Invocation |
 | --- | --- | --- |
@@ -95,7 +109,8 @@ These paths follow the hosts' current documentation:
 This integration targets local agent hosts with filesystem and command tools;
 ordinary web chat is not an equivalent runtime.
 
-Launch a fresh session from the private workspace. Confirm the four skills appear
+Launch a fresh session from the project root (the checkout in the single-repo
+layout). Confirm the four skills appear
 and load one linked reference. Some hosts require a recognized Git project and
 explicit trust. If needed, initialize a **private local** Git repository there;
 the toolkit does not create a remote or publish candidate records. Hermes project
@@ -104,8 +119,8 @@ skill discovery requires inspecting the skills and explicitly running
 
 Give the host this first instruction:
 
-> Read RESUME_TOOLKIT.md. Use this directory as my explicit private candidate
-> workspace. Run the documented onboarding command and follow its returned skill.
+> Read RESUME_TOOLKIT.md. Use its explicit private data workspace and pinned
+> interpreter. Run the documented onboarding command and follow its returned skill.
 > Capture or import my actual experience, then tailor the requested documents to
 > the full job description. Use real independent reviewers where available and
 > report which reviews and visual checks actually ran. Keep unknowns and limits
@@ -131,15 +146,19 @@ about its usefulness; matching words in evidence is insufficient.
 Hooks are an optional next step:
 
 ```text
-cv install-hooks --workspace ROOT --host codex
-cv install-hooks --workspace ROOT --host hermes
+cv install-hooks --workspace user-profile --project-root . --host codex
+cv install-hooks --workspace user-profile --project-root . --host claude
+cv install-hooks --workspace user-profile --project-root . --host hermes
 ```
 
 Run only the command for the host you intend to activate. Setup does not install
 or trust hooks. Follow [Codex activation and execution evidence](codex-workflows.md)
 or [Hermes opt-ins and scope](agent-hosts.md#hermes-entry-hook-routing-workspace-cv-onboard-route).
-Claude Code uses the installed skills and explicit orchestration; this package
-does not install a Claude lifecycle adapter.
+Claude Code's `SessionStart` and `UserPromptSubmit` adapters add advisory routing
+to `.claude/settings.local.json`, preserving unrelated settings and hooks.
+They do not save answers or restore Codex checkpoints. See
+[host setup](agent-hosts.md#claude-code) for activation and scope. All adapters
+are installed at the project root and explicitly bound to the data workspace.
 
 Without actual lifecycle metadata, continue from the private records manually and
 report automatic restoration as unverified. For reviewed revisions, snapshot all

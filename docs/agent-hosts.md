@@ -8,6 +8,14 @@ For a fresh or existing private workspace, use `cv setup ROOT --host codex`,
 for package installation, repeatable setup and distribution builds. The commands
 install/check local files; they do not verify native discovery or review execution.
 
+For one cloned repository, use `cv setup user-profile --host all --project-root .`
+and the same roots with `doctor` and `install-hooks`. Start the host at the
+repository root; data lives in ignored `user-profile/`. Skills and hooks live at
+the project root. Read the generated local `RESUME_TOOLKIT.md` for the pinned
+interpreter and exact data path. Omitting `--project-root` retains the external
+workspace layout, where host files and data share one root. Never select a
+workspace based on the first employer folder or a global `cv` executable.
+
 ## Codex
 
 Launch Codex from this checkout. Its project copies are in `.agents/skills/`; explicitly request `$application-materials` or ask it to use that skill. `AGENTS.md` also provides a manual entrypoint. Codex documents repository discovery in `.agents/skills` from the current directory to the repository root. See [official OpenAI documentation](https://learn.chatgpt.com/docs/build-skills).
@@ -21,6 +29,22 @@ For a separate private workspace, run `cv install-skills --workspace ROOT --host
 Launch Claude Code from this checkout. Generated project skills are in `.claude/skills/`; use `/application-materials`. `CLAUDE.md` points to the shared agent instructions. Claude documents this directory as project scope and exposes the skill name as a slash command. See [Claude Code skills](https://code.claude.com/docs/en/skills).
 
 For a separate workspace, use `cv install-skills --workspace ROOT --host claude` and confirm the command is available in a session there. Reload or restart if the host does not pick up a newly created top-level skills directory.
+
+Optional entry hooks install with `cv install-hooks --workspace user-profile --project-root . --host claude`.
+They merge `SessionStart` and `UserPromptSubmit` command groups into
+`.claude/settings.local.json`, preserve unrelated settings and hooks, and refuse
+conflicting toolkit installations. The bundled runner and validators live in
+`.claude/hooks/resume-toolkit/`. Inspect those files and restart Claude Code in
+the project. The adapter uses command hooks with an executable and an `args`
+array; the installed host must support that form. See
+[Claude hooks](https://code.claude.com/docs/en/hooks).
+
+Both events classify the bound data workspace and return advisory workflow
+context. They require a session ID and a cwd within the project, reject other
+nested workspaces, and never derive a data path from prompt text. They do not
+persist answers, restore Codex checkpoints, authenticate independent review, or
+approve documents. Installed-runner tests establish routing, not native event
+delivery; verify delivery in a fresh host session before claiming it.
 
 ## Hermes
 
@@ -37,10 +61,12 @@ For a guided fresh setup (venv, private workspace, state routing, skills and ent
 1. **Project plugin discovery**: Hermes scans `.hermes/plugins/` only when project plugins are enabled — set `HERMES_ENABLE_PROJECT_PLUGINS=1` (docs use `true`) before launching Hermes.
 2. **Enable/trust**: run `hermes plugins enable resume-toolkit` (or the equivalent enable/trust command for the installed version) and review the plugin at `ROOT/.hermes/plugins/resume-toolkit/` first; the toolkit runs no trust command itself.
 
-Restart Hermes from the exact workspace root after installing skills or enabling the plugin.
+With `--project-root PROJECT`, the plugin is installed under that project's
+`.hermes/plugins/` and its binding identifies the child data workspace. Restart
+Hermes from the exact project root after installing skills or enabling the plugin.
 
 The hook is scoped and advisory:
-- It supports only a **dedicated CLI process launched at the exact workspace root**, with an explicit `platform='cli'` hook payload; it stays **silent** for missing/unknown platforms or when process cwd differs from the plugin root. **Hermes desktop and gateway processes are not certified.**
+- It supports only a **dedicated CLI process launched at the exact project root**, with an explicit `platform='cli'` hook payload; it stays **silent** for missing/unknown platforms or when process cwd differs from the plugin's project root. **Hermes desktop and gateway processes are not certified.**
 - It returns `pre_llm_call` user context each turn, routing the agent to the workflow determined by the read-only `cv onboard --workspace ROOT` classifier (`experience-capture` for capture/interview/import, `application-materials` when ready, etc.).
 - It is **advisory routing, not a sandbox**: structural validity does not prove factual truth, and approval/release is never asserted. It validates local records including claim text, but does not follow original source documents or include candidate claim text in routing context.
 
@@ -60,7 +86,9 @@ Instead, use the user's explicit private workspace for each operation:
 1. Run the installed `cv onboard --workspace ABSOLUTE_ROOT` command.
 2. Follow its returned state. For `unconfigured` or `malformed`, repair/setup
    before drafting; otherwise load the returned workflow from
-   `ABSOLUTE_ROOT/.hermes/skills/SKILL_NAME/SKILL.md` and its references.
+   `PROJECT_ROOT/.hermes/skills/SKILL_NAME/SKILL.md` and its references, using the
+   project root from the local startup guide (same as `ABSOLUTE_ROOT` when no
+   separate project root was configured).
 3. If native project discovery is unavailable, use absolute-path file reads.
    File reads are a fallback, not proof of `skills_list`/`skill_view` discovery.
 4. Pass that same explicit root to subsequent `cv` commands. After a workspace

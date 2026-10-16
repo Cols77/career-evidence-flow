@@ -13,27 +13,36 @@ The agent workflows are the product entrypoint. Python supplies the evidence val
 | [resume-review](skills/resume-review/SKILL.md) | Independently review evidence, job fit, voice, ATS output and layout |
 | [cover-letter-review](skills/cover-letter-review/SKILL.md) | Independently review genuine motivation, company relevance, consistency and layout |
 
-Read [the application workflow](docs/application-workflow.md) and [host setup](docs/agent-hosts.md). The canonical skills and their supporting references live in `skills/`. Generated repository copies live in `.agents/skills/` for Codex/Hermes and `.claude/skills/` for Claude Code. [AGENTS.md](AGENTS.md) is the generic agent entrypoint; [CLAUDE.md](CLAUDE.md) points Claude to the same workflow.
+Read [the application workflow](docs/application-workflow.md) and [host setup](docs/agent-hosts.md). The canonical skills and their supporting references live in `skills/`. Generated repository copies live in `.agents/skills/` for Codex and `.claude/skills/` for Claude Code; setup installs local `.hermes/skills/` copies for Hermes. [AGENTS.md](AGENTS.md) is the generic agent entrypoint; [CLAUDE.md](CLAUDE.md) points Claude to the same workflow.
 
 ## Start with an agent
 
-Install the package once (Python 3.11 or newer), then create a private workspace
-with the complete skills for your host:
+Clone this repository, install its package in a dedicated environment (Python
+3.11 or newer), and keep your private profile in its ignored `user-profile/` folder:
 
 ```powershell
 python -m venv .venv
 .venv/Scripts/python -m pip install .
-.venv/Scripts/cv setup ../my-private-workspace --host codex
-.venv/Scripts/cv doctor --workspace ../my-private-workspace --host codex
+.venv/Scripts/cv setup user-profile --host all --project-root .
+.venv/Scripts/cv doctor --workspace user-profile --host all --project-root .
 ```
 
-Use `--host claude`, `--host hermes` or `--host all` as appropriate. On macOS/Linux,
-use `.venv/bin/python` and `.venv/bin/cv`. Open the private workspace in your AI
-host, read its generated `RESUME_TOOLKIT.md`, and ask:
+Use `--host codex`, `--host claude` or `--host hermes` to select one host. On
+macOS/Linux, use `.venv/bin/python` and `.venv/bin/cv`. Open this repository in
+your AI host, read its generated local `RESUME_TOOLKIT.md`, and ask:
 
-> Use application-materials. My private candidate workspace is ../my-private-workspace. Help me capture my actual experience, then tailor a resume and cover letter to the full job description I supply. Ask only questions that change the application, preserve unknowns and limitations, and run independent reviewers when available. Follow the employer's document and AI-use instructions.
+> Read RESUME_TOOLKIT.md and use its pinned environment. My private candidate workspace is user-profile. Help me capture my actual experience, then tailor a resume and cover letter to the full job description I supply. Ask only questions that change the application, preserve unknowns and limitations, and run independent reviewers when available. Follow the employer's document and AI-use instructions.
 
 The host reads the skill and references, writes the evidence and drafts, and invokes `cv` using the installed executable. A blank workspace intentionally has no candidate claims until real facts are captured. No command invents a profile or generates prose without an agent.
+
+This repo contains all toolkit code, schemas, styles, fictional examples and host
+adapters. No other resume repository is needed. `user-profile/profile/` holds
+your standard evidence database; `user-profile/applications/` separates jobs;
+`user-profile/outputs/` holds generated documents and reviews. The entire
+`user-profile/` directory is ignored by Git and excluded from distributions.
+Cloning the repo reproduces the tools and examples, not another person's data.
+Back up your private folder separately. A wheel installation can instead use an
+external workspace: `cv setup /private/workspace --host all`.
 
 `cv setup` safely reuses a valid workspace and identical installed skills, preserving candidate data and existing instructions. Conflicting skill files require an explicit comparison and upgrade. The lower-level `cv install-skills` remains available. Installation does not prove runtime discovery.
 
@@ -69,6 +78,6 @@ The four agent skills include interview procedures, drafting steps, schema examp
 
 The full guarded release system remains unfinished: exhaustive claim maps, authenticated reviewer records, complete dependency invalidation, enforced repair rounds and immutable reviewed-byte release. `cv status` always reports `draft_only` and `release_available: false`. Files are previews; successful checks do not certify submission readiness. See [review and release](docs/review-and-release.md). Native host discovery and full host acceptance must be demonstrated separately from installing files or running tests.
 
-Keep real profiles, answers and outputs outside this public repository. It contains synthetic examples and fresh history. Before publishing changes, run [privacy checks](docs/privacy.md) with an external private denylist and inspect the file allowlist. No open-source license has been selected, and this project is not published to PyPI.
+Keep real profiles, answers and outputs in ignored `user-profile/` or an external private workspace, never in tracked files. The shared repository contains synthetic examples. Before publishing changes, run [privacy checks](docs/privacy.md) with an external private denylist and inspect the file allowlist. No open-source license has been selected, and this project is not published to PyPI.
 
 For development: `python -m pytest -q`; check generated skill copies with `python tools/sync_skills.py --check`. Edit only `skills/` and regenerate with `python tools/sync_skills.py`. See [contributing](CONTRIBUTING.md).

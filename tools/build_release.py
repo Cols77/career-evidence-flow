@@ -24,8 +24,8 @@ from urllib.parse import unquote, urlsplit, urlunsplit
 ROOT = Path(__file__).resolve().parents[1]
 # Adding a distributable file requires deliberately extending this allowlist.
 MODULES = """
-__init__ application artifact_audit ats bootstrap cli codex_hooks deployment
-evidence gallery jev_review jev_review_cli letter_check onboarding projection
+__init__ application artifact_audit ats bootstrap claude_hooks cli codex_hooks deployment
+evidence gallery hook_scope jev_review jev_review_cli letter_check onboarding projection
 questions records render resume_layout workspace
 """.split()
 STYLES = "ats branded letter minimal modern resume-layout".split()

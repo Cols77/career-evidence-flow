@@ -3,15 +3,18 @@
 Installed files do not prove host discovery, hook execution or review quality.
 """
 from importlib.resources import files
+import os
 from pathlib import Path
+import shlex
 import shutil
 import subprocess
+import sys
 
-from .bootstrap import SKILLS, _skill_resources, init_workspace
+from .bootstrap import SKILLS, _skill_resources, init_workspace, workspace_project_root
 from .evidence import _require_source_registry, build_source_registry, load_evidence
 from .onboarding import classify
 from .projection import load_projection
-from .records import ToolkitError, load_json
+from .records import ToolkitError, atomic_write_json, load_json
 from .workspace import Workspace
 
 
@@ -24,10 +27,20 @@ class DeploymentError(ToolkitError):
 
 _GUIDE = '''# Resume Toolkit workspace
 
-Start the chosen host from this private workspace with the Python environment
-containing `cv` activated. Run `cv doctor --workspace . --host HOST` (codex,
-claude, hermes or all), then `cv onboard --workspace .`. Follow the returned
-workflow and read its SKILL.md and linked references before drafting.
+Start the chosen host from the explicit project root below. The data workspace
+is separate from host discovery when it is a project subdirectory. Use the
+pinned interpreter commands below, then follow the returned workflow and read
+its SKILL.md and linked references before drafting. Read the bound data
+workspace's README.md and AGENTS.md when present for private source inventories
+and writing preferences, subject to the user's current instructions.
+
+Project root: `{project}`
+Data workspace: `{workspace}`
+
+```text
+{doctor_command}
+{onboard_command}
+```
 
 Installed project skills are in `.agents/skills/` for Codex,
 `.claude/skills/` for Claude Code, and `.hermes/skills/` for Hermes. Only the
@@ -37,8 +50,8 @@ unavailable, ask the agent to read the selected directory's
 Codex uses `$experience-capture` / `$application-materials`; Claude Code and
 Hermes use `/experience-capture` / `/application-materials` after discovery.
 
-For example: "Use this explicit private workspace. Read RESUME_TOOLKIT.md,
-run cv onboard with this workspace path, load the returned skill and its
+For example: "Use the explicit data workspace above. Read RESUME_TOOLKIT.md,
+run the onboard command above, load the returned skill and its
 references, and help me capture my experience or prepare application previews."
 
 An empty profile needs an experience interview/import. Synthetic examples are
@@ -98,7 +111,7 @@ def _host_status(root, host, payload):
         current = current / part
         if current.is_symlink() or (current.exists() and not current.is_dir()):
             raise _conflict(host)
-        if not current.resolve().is_relative_to(root):
+        if current.resolve() != current:
             raise _conflict(host)
     present = [(prefix / name).exists() or (prefix / name).is_symlink() for name in SKILLS]
     if not any(present):
@@ -111,7 +124,7 @@ def _host_status(root, host, payload):
             raise _conflict(host)
         actual = {}
         for path in folder.rglob('*'):
-            if path.is_symlink() or not path.resolve().is_relative_to(root):
+            if path.is_symlink() or path.resolve() != path:
                 raise _conflict(host)
             if path.is_file():
                 actual[path.relative_to(folder).as_posix()] = path.read_bytes()
@@ -144,9 +157,24 @@ def _workspace(root):
     return workspace, state
 
 
-def setup(root, *, host, name='Candidate', example=None):
+def _guide(root, project, host):
+    def command(*args):
+        argv = [str(Path(sys.executable).resolve()), '-m', 'cv_toolkit.cli', *args]
+        if os.name == 'nt':
+            return '& ' + ' '.join("'" + arg.replace("'", "''") + "'" for arg in argv)
+        return shlex.join(argv)
+
+    return _GUIDE.format(
+        project=project, workspace=root,
+        doctor_command=command('doctor', '--workspace', str(root), '--host', host,
+                               '--project-root', str(project)),
+        onboard_command=command('onboard', '--workspace', str(root)))
+
+
+def setup(root, *, host, name='Candidate', example=None, project_root=None):
     """Preflight all requested hosts, then install without overwriting user files."""
     root = Path(root).expanduser().resolve()
+    project = workspace_project_root(root, project_root)
     selected = _selected(host)
     payload = _payload()
     new = not root.exists() or (root.is_dir() and not any(root.iterdir()))
@@ -166,27 +194,38 @@ def setup(root, *, host, name='Candidate', example=None):
                 'Choose a new private directory or repair cvtool.toml and profile records; '
                 'nothing was changed.'
             ) from None
-    statuses = {item: _host_status(root, item, payload) for item in selected}
+    statuses = {item: _host_status(project, item, payload) for item in selected}
     instruction_names = ['RESUME_TOOLKIT.md']
     if any(item in selected for item in ('codex', 'hermes')):
         instruction_names.append('AGENTS.md')
     if 'claude' in selected:
         instruction_names.append('CLAUDE.md')
     for filename in instruction_names:
-        path = root / filename
+        path = project / filename
         if path.exists() and not path.is_file():
             raise DeploymentError(
                 f'{filename} is not a file. Move that path aside before setup; nothing was changed.'
             )
+        if filename == 'RESUME_TOOLKIT.md' and project != root and path.is_file():
+            existing = path.read_text(encoding='utf-8')
+            if existing.startswith('# Resume Toolkit workspace') and f'Data workspace: `{root}`' not in existing:
+                raise DeploymentError(
+                    'Existing startup guide describes another workspace. Inspect and preserve '
+                    'RESUME_TOOLKIT.md before deliberately replacing that guide and rebinding; nothing was changed.')
     if new:
         init_workspace(root, name=name, example=example)
         _, state = _workspace(root)
+    if project != root:
+        binding = project / '.local/resume-toolkit/project.json'
+        if not binding.exists():
+            binding.parent.mkdir(parents=True, exist_ok=True)
+            atomic_write_json(binding, {'schema_version': 1, 'workspace': root.relative_to(project).as_posix()})
     hosts = {}
     for item, status in statuses.items():
         if status == 'missing':
             for skill, resources in payload.items():
                 for relative, raw in resources.items():
-                    target = root / HOSTS[item] / skill / relative
+                    target = project / HOSTS[item] / skill / relative
                     target.parent.mkdir(parents=True, exist_ok=True)
                     with target.open('xb') as stream:
                         stream.write(raw)
@@ -194,22 +233,22 @@ def setup(root, *, host, name='Candidate', example=None):
                        'skill_count': len(SKILLS), 'runtime_discovery_verified': False}
     instructions = {}
     for filename in instruction_names:
-        path = root / filename
+        path = project / filename
         if path.exists() or path.is_symlink():
             instructions[filename] = 'preserved'
         else:
-            body = _GUIDE if filename == 'RESUME_TOOLKIT.md' else (
+            body = _guide(root, project, host) if filename == 'RESUME_TOOLKIT.md' else (
                 '# Resume Toolkit\n\nRead [RESUME_TOOLKIT.md](RESUME_TOOLKIT.md) and '
                 'the selected workflow skill with its linked references.\n'
             )
             with path.open('x', encoding='utf-8', newline='\n') as stream:
                 stream.write(body)
             instructions[filename] = 'created'
-    return {'workspace': str(root), 'initialized': new, 'profile_preserved': not new,
+    return {'workspace': str(root), 'project_root': str(project), 'initialized': new, 'profile_preserved': not new,
             'state': state.state, 'skill': state.load_skill, 'guidance': state.action,
             'hosts': hosts, 'instructions': instructions,
-            'startup_guide': str(root / 'RESUME_TOOLKIT.md'),
-            'fallback_skill_paths': {item: str(root / HOSTS[item] / state.load_skill / 'SKILL.md')
+            'startup_guide': str(project / 'RESUME_TOOLKIT.md'),
+            'fallback_skill_paths': {item: str(project / HOSTS[item] / state.load_skill / 'SKILL.md')
                                      for item in selected},
             'runtime_discovery_verified': False, 'hooks_changed': False,
             'hooks_installed_by_setup': False,
@@ -260,15 +299,44 @@ def _ignore_check(workspace, git_root):
             'Output contents are not fully ignored or are tracked; repair ignore/index rules before generating documents.'}
 
 
-def doctor(root, *, host='all'):
+def _workspace_ignore_check(workspace, project, git_root):
+    """A private child in a source project must be wholly ignored and untracked."""
+    relative = workspace.root.relative_to(project).as_posix()
+    base = {'id': 'workspace_ignore', 'directory': relative, 'enforced': False}
+    if git_root is None:
+        return {**base, 'status': 'warning', 'message':
+                'Private workspace ignore enforcement is unverified without a usable Git repository.'}
+    ignored = _git(project, 'check-ignore', '-q', '--',
+                   str(workspace.root / '.__resume_toolkit_private_probe__'))
+    tracked = _git(project, 'ls-files', '-z', '--', str(workspace.root))
+    unignored = _git(project, 'ls-files', '--others', '--exclude-standard', '-z', '--', str(workspace.root))
+    if (ignored is None or ignored.returncode not in (0, 1)
+            or any(result is None or result.returncode != 0 for result in (tracked, unignored))):
+        return {**base, 'status': 'warning', 'message':
+                'Git could not verify the private workspace; inspect repository ignore and index rules.'}
+    tracked_count = len([entry for entry in tracked.stdout.split(b'\0') if entry])
+    unignored_count = len([entry for entry in unignored.stdout.split(b'\0') if entry])
+    enforced = ignored.returncode == 0 and tracked_count == 0 and unignored_count == 0
+    return {**base, 'status': 'pass' if enforced else 'error', 'enforced': enforced,
+            'tracked_file_count': tracked_count, 'unignored_file_count': unignored_count,
+            'message': 'The entire private workspace is ignored and untracked.' if enforced else
+            'Private candidate files are tracked or not fully ignored. Ignore the whole data workspace '
+            'and remove any candidate files from the index before capturing or publishing.'}
+
+
+def doctor(root, *, host='all', project_root=None):
     """Inspect deployment prerequisites without writing files or activating hosts."""
     from .render import _find_chromium
 
     root = Path(root).expanduser().resolve()
+    project = workspace_project_root(root, project_root)
     selected = _selected(host)
     checks = []
-    result = {'workspace': str(root), 'checks': checks, 'runtime_discovery_verified': False,
+    result = {'workspace': str(root), 'project_root': str(project), 'checks': checks, 'runtime_discovery_verified': False,
               'hook_execution_verified': False, 'independent_review_verified': False}
+    checks.append({'id': 'package', 'status': 'pass', 'path': str(Path(__file__).resolve().parent),
+                   'interpreter': str(Path(sys.executable).resolve()),
+                   'message': 'Actual imported package and interpreter; other PATH executables may use a different installation.'})
     workspace = None
     try:
         workspace, state = _workspace(root)
@@ -289,7 +357,7 @@ def doctor(root, *, host='all'):
     payload = _payload()
     for item in selected:
         try:
-            status = _host_status(root, item, payload)
+            status = _host_status(project, item, payload)
             checks.append({'id': f'skills.{item}', 'status': 'pass' if status == 'matching' else 'error',
                            'state': status, 'message': 'All packaged skills and references match.'
                            if status == 'matching' else f'Run cv setup DIRECTORY --host {item} to install skills.'})
@@ -308,14 +376,14 @@ def doctor(root, *, host='all'):
                    'Chromium executable found; PDF rendering has not been exercised.' if browser else
                    'No Chromium executable found. HTML previews work; install Chrome/Edge/Chromium or set CV_CHROME_PATH for PDF rendering.'})
     git_root = None
-    if shutil.which('git') and root.is_dir():
-        discovery = _git(root, 'rev-parse', '--show-toplevel')
+    if shutil.which('git') and project.is_dir():
+        discovery = _git(project, 'rev-parse', '--show-toplevel')
         if discovery is not None and discovery.returncode == 0:
             git_root = discovery.stdout.decode('utf-8', errors='replace').strip()
     checks.append({'id': 'git', 'status': 'pass' if git_root else 'warning', 'root': git_root,
                    'message': 'Git root found. Host discovery/trust still requires a real host session.' if git_root else
                    'No usable Git root found. Codex/Hermes project discovery may require one; create a private local repository or load skill files explicitly. No trust settings were changed.'})
-    if 'hermes' in selected and git_root and Path(git_root).resolve() != root:
+    if 'hermes' in selected and git_root and Path(git_root).resolve() != project:
         checks.append({'id': 'hermes.project_root', 'status': 'warning', 'message':
                        'This workspace is below the Git project root. Hermes project discovery '
                        'looks at the root, so these workspace-local skills may not be discovered. '
@@ -323,5 +391,7 @@ def doctor(root, *, host='all'):
                        'installed skill paths explicitly. No repository or trust settings were changed.'})
     if workspace is not None:
         checks.append(_ignore_check(workspace, git_root))
+        if project != root:
+            checks.append(_workspace_ignore_check(workspace, project, git_root))
     result['status'] = 'invalid' if any(check['status'] == 'error' for check in checks) else 'ok'
     return result

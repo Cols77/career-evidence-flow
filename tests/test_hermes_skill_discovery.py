@@ -19,6 +19,7 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 import pytest
@@ -46,6 +47,19 @@ def hermes_python():
         if candidate and Path(candidate).is_file():
             return candidate
     pytest.skip("no Hermes installation found to dispatch against")
+
+
+@pytest.fixture
+def non_git_tmp_path():
+    """Keep the no-project case outside any enclosing checkout or --basetemp."""
+    # pytest's basetemp may intentionally live in the project, and even a sibling
+    # under a coding directory can inherit that directory's .git marker.
+    with tempfile.TemporaryDirectory(prefix='resume-toolkit-no-git-') as directory:
+        root = Path(directory).resolve()
+        enclosing = [str(parent) for parent in (root, *root.parents)
+                     if (parent / '.git').exists()]
+        assert not enclosing, f'No-Git fixture requires an OS temp directory outside repositories: {enclosing}'
+        yield root
 
 
 def _home_with_config(tmp_path, *, trusted_repo=None, disable=False):
@@ -78,6 +92,8 @@ _DRIVER = (
     "from tools.skills_tool import skills_list, skill_view\n"
     "from agent import skill_utils as su\n"
     "\n"
+    "root = su.find_project_root()\n"
+    "print('PROJECT_ROOT=' + json.dumps(str(root) if root is not None else None))\n"
     "names = sorted(s['name'] for s in json.loads(skills_list()).get('skills', []))\n"
     "print('LIST_NAMES=' + json.dumps(names))\n"
     "print('PROJECT_DIRS=' + json.dumps([str(d) for d in su.get_project_skills_dirs()]))\n"
@@ -182,14 +198,16 @@ def test_untrusted_project_skills_do_not_load(tmp_path, hermes_python):
     assert untrusted["none"] is False and untrusted["count"] >= len(CANONICAL), untrusted
 
 
-def test_no_git_project_discovery_has_no_fallback(tmp_path, hermes_python):
+def test_no_git_project_discovery_has_no_fallback(non_git_tmp_path, hermes_python):
     """Skills next to a non-git cwd are not picked up: no accidental fallback."""
+    tmp_path = non_git_tmp_path
     plain = tmp_path / "plain"  # no .git marker anywhere up from it
     plain.mkdir(parents=True)
     _install_all(plain)
     home = _home_with_config(tmp_path, trusted_repo=plain)
     proc = _bounded_run(hermes_python, tmp_path, _DRIVER, home=home, cwd=plain)
     assert proc.returncode == 0, proc.stderr
+    assert json.loads(_line(proc, 'PROJECT_ROOT=')[len('PROJECT_ROOT='):]) is None
 
     names = json.loads(_line(proc, "LIST_NAMES=")[len("LIST_NAMES="):])
     assert CANONICAL.isdisjoint(set(names)), f"repo-local skills loaded sans git: {names}"

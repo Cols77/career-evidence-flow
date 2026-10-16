@@ -77,7 +77,10 @@ def scan(repo: Path, denylist: Path, mode: str) -> dict:
             if not metadata:
                 result['files_scanned'] += 1
                 parts = Path(path).parts
-                if any(p.casefold() in {'.hermes', 'private', 'outputs', 'profiles', '.git'} for p in parts) or Path(path).name.casefold().startswith('.env') or Path(path).suffix.casefold() in {'.pem', '.key', '.pfx', '.p12'}:
+                lowered = tuple(p.casefold() for p in parts)
+                local_claude = ('.claude' in lowered and Path(path).name.casefold() == 'settings.local.json') or any(lowered[i:i + 2] == ('.claude', 'hooks') for i in range(len(lowered) - 1))
+                local_guide = Path(path).name.casefold() == 'resume_toolkit.md'
+                if any(p in {'.hermes', '.codex', '.local', 'private', 'user-profile', 'outputs', 'profiles', '.git'} for p in lowered) or local_claude or local_guide or Path(path).name.casefold().startswith('.env') or Path(path).suffix.casefold() in {'.pem', '.key', '.pfx', '.p12'}:
                     finding(path, 'sensitive.path')
                 if Path(path).suffix.casefold() not in TEXT_SUFFIXES and Path(path).name not in TEXT_NAMES:
                     finding(path, 'unexpected.binary')

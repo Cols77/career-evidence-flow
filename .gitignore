@@ -12,6 +12,11 @@ outputs/
 private/
 .local/
 .hermes/
+.codex/
+.claude/hooks/
+.claude/settings.local.json
+/user-profile/
+/RESUME_TOOLKIT.md
 .tests-*/
 *.pdf
 *.png

@@ -1,5 +1,15 @@
 # Shareability checks
 
+The single-repo layout stores personal data under `/user-profile/`, ignored in
+its entirety. Host bindings (`.local/`), hooks (`.codex/`, `.hermes/`,
+`.claude/hooks/`, `.claude/settings.local.json`) and the generated
+`RESUME_TOOLKIT.md` guide stay local too. Shared skills remain tracked. An
+external private workspace is also supported. Before capturing personal data,
+verify `git check-ignore user-profile/profile/evidence.json` succeeds and
+`git ls-files user-profile` is empty. A `.gitignore` rule does not untrack files
+already committed. Back up private data separately; cloning the public repo
+does not restore it. Source and wheel distributions exclude private workspaces.
+
 Use a fresh repository with an explicit reviewed file allowlist. Never import the private repository's Git history, profiles, answers, plans, delivered artifacts, secrets or adapters.
 
 Keep the real denylist **outside** this repository. Its format is:

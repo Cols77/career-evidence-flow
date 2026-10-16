@@ -100,6 +100,31 @@ def test_sensitive_paths_binary_and_utf16_are_detected(scan_repo):
     assert {'path': 'memo.txt', 'rule_id': 'private.fixture'} in result['findings']
 
 
+def test_forced_staging_of_ignored_user_profile_is_blocked(scan_repo):
+    repo, denylist = scan_repo
+    (repo / '.gitignore').write_text('/user-profile/\n')
+    candidate = repo / 'user-profile' / 'profile' / 'evidence.json'
+    candidate.parent.mkdir(parents=True)
+    candidate.write_text('{"items": []}')
+    git(repo, 'add', '.gitignore')
+    assert module().scan(repo, denylist, 'worktree')['status'] == 'ok'
+    git(repo, 'add', '-f', 'user-profile/profile/evidence.json')
+    result = module().scan(repo, denylist, 'staged')
+    assert result['status'] == 'blocked'
+    assert {'path': 'user-profile/profile/evidence.json', 'rule_id': 'sensitive.path'} in result['findings']
+
+
+@pytest.mark.parametrize('relative', ['.codex/hooks.json', '.local/resume-toolkit/project.json', '.claude/settings.local.json', '.claude/hooks/resume-toolkit/runner.py', 'RESUME_TOOLKIT.md'])
+def test_local_host_binding_files_are_not_publishable(scan_repo, relative):
+    repo, denylist = scan_repo
+    path = repo / relative
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text('{}')
+    git(repo, 'add', '-f', relative)
+    result = module().scan(repo, denylist, 'staged')
+    assert {'path': relative, 'rule_id': 'sensitive.path'} in result['findings']
+
+
 def test_untracked_visible_files_and_history_filenames_are_scanned(scan_repo):
     repo, denylist = scan_repo
     (repo / 'Secret Fixture Identity.md').write_text('safe')

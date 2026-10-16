@@ -18,6 +18,7 @@ import time
 import uuid
 
 from .onboarding import STATE_TO_SKILL, classify
+from .hook_scope import bound_workspace, in_scope
 from .records import ToolkitError, _decode, atomic_write_json, confined, load_json, object_fields
 
 SKILLS = ('experience-capture', 'application-materials', 'resume-review', 'cover-letter-review')
@@ -227,10 +228,12 @@ def checkpoint_status(workspace, session_id):
     }
 
 
-def _context(route, state, session):
+def _context(route, state, session, workspace, project):
     text = ('Resume Toolkit advisory context. Apply only to the requested candidate/application work; '
             'do not redirect unrelated requests. Reconcile this context with current user instructions. '
             f'Current hook session ID for cv workflow-checkpoint/workflow-status: {session}. '
+            f'Use explicit data workspace {workspace} for cv commands and canonical records. '
+            f'Load skills and references from {project / ".agents/skills"}. '
             + route.as_context()['context'])
     checkpoint = state['checkpoint']
     if checkpoint:
@@ -250,26 +253,18 @@ def _context(route, state, session):
     return text
 
 
-def dispatch(payload, workspace, *, _trace=None):
+def dispatch(payload, workspace, *, project_root=None, _trace=None):
     """Consume documented host metadata only; never read transcripts or messages."""
     trace = _trace if _trace is not None else {}
     trace['outcome'] = 'ignored'
     if not isinstance(payload, dict) or payload.get('hook_event_name') not in EVENTS:
         return {}
     session = payload.get('session_id')
-    cwd = payload.get('cwd')
-    if not isinstance(session, str) or not _SESSION.fullmatch(session) or not isinstance(cwd, str) or not Path(cwd).is_absolute():
+    if not in_scope(payload, workspace, project_root):
         return {}
     try:
         root = _root(workspace)
-        session_cwd = Path(cwd).resolve(strict=True)
-        if not session_cwd.is_relative_to(root):
-            return {}
-        current = session_cwd
-        while current != root:
-            if (current / 'cvtool.toml').exists():
-                return {}  # Inherited outer hooks cannot bind a nested workspace.
-            current = current.parent
+        project = _root(project_root or root)
     except (OSError, ValueError, RuntimeError):
         return {}
     try:
@@ -292,7 +287,7 @@ def dispatch(payload, workspace, *, _trace=None):
             status = checkpoint_status(root, session)
             trace.update(outcome='context_emitted', route=route.state, freshness=status['freshness'])
             return {'hookSpecificOutput': {'hookEventName': event,
-                    'additionalContext': _context(route, status, session)}}
+                    'additionalContext': _context(route, status, session, root, project)}}
         trace.update(outcome='observed', route=state['route'])
         return {}
     except (OSError, ValueError, RuntimeError, RecursionError, OverflowError, TypeError):
@@ -300,23 +295,29 @@ def dispatch(payload, workspace, *, _trace=None):
         return {'systemMessage': _WARNING}
 
 
-def main(installed_root):
+def main(installed_root, workspace_relative='.'):
     """Installed runner entrypoint, independent of cwd/PYTHONPATH/package install."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--workspace', required=True, type=Path)
     parser.add_argument('--probe', action='store_true', help='Label this invocation as a manual diagnostic probe')
     args = parser.parse_args()
-    log = _ExecutionLog(installed_root, args.probe)
+    # Keep diagnostics and checkpoints with private data, not project sources.
+    try:
+        data_root = bound_workspace(installed_root, workspace_relative)
+    except (OSError, ValueError, RuntimeError):
+        print(json.dumps({'systemMessage': _WARNING}, sort_keys=True))
+        return 0
+    log = _ExecutionLog(data_root, args.probe)
     payload, trace, outcome = None, {}, 'invalid_input'
     try:
-        if _root(args.workspace) != _root(installed_root):
+        if _root(args.workspace) != data_root:
             outcome = 'workspace_mismatch'
             raise ToolkitError('installation workspace mismatch')
         raw = sys.stdin.buffer.read(MAX_INPUT + 1)
         if len(raw) > MAX_INPUT:
             raise ToolkitError('hook input too large')
         payload = _decode(raw)
-        result = dispatch(payload, args.workspace, _trace=trace)
+        result = dispatch(payload, data_root, project_root=installed_root, _trace=trace)
         outcome = trace.pop('outcome')
     except (OSError, ValueError, RuntimeError, RecursionError, OverflowError):
         result = {'systemMessage': _WARNING}

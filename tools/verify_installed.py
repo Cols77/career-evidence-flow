@@ -8,8 +8,94 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import shlex
 import subprocess
 import sys
+
+
+def verify_project_deployment(project, command, interpreter):
+    """Exercise installed adapter processes, without claiming native host runs."""
+    project = Path(project).resolve()
+    project.mkdir(parents=True, exist_ok=False)
+    workspace = project / 'user-profile'
+    setup_args = ('setup', str(workspace), '--host', 'all', '--project-root', str(project))
+    setup = command(*setup_args)
+    assert setup['workspace'] == str(workspace) and setup['project_root'] == str(project)
+    assert json.loads((workspace / 'profile/evidence.json').read_text(encoding='utf-8')) == {
+        'schema_version': '1', 'candidate_id': 'candidate.new', 'items': []}
+    assert json.loads((project / '.local/resume-toolkit/project.json').read_text(encoding='utf-8')) == {
+        'schema_version': 1, 'workspace': 'user-profile'}
+    for prefix in ('.agents/skills', '.claude/skills', '.hermes/skills'):
+        assert (project / prefix / 'experience-capture/SKILL.md').is_file()
+        assert not (workspace / prefix).exists()
+    before = {p.relative_to(project): (p.read_bytes(), p.stat().st_mtime_ns)
+              for p in project.rglob('*') if p.is_file()}
+    command(*setup_args)
+    diagnosis = command('doctor', '--workspace', str(workspace), '--host', 'all', '--project-root', str(project))
+    assert all(any(c['id'] == f'skills.{host}' and c['status'] == 'pass' for c in diagnosis['checks'])
+               for host in ('codex', 'claude', 'hermes'))
+    assert before == {p.relative_to(project): (p.read_bytes(), p.stat().st_mtime_ns)
+                      for p in project.rglob('*') if p.is_file()}, 'split setup/doctor changed existing files'
+
+    sibling = project / 'other-profile'
+    nested = workspace / 'nested-profile'
+    command('init', str(sibling))
+    command('init', str(nested))
+    for host in ('codex', 'claude', 'hermes'):
+        installed = command('install-hooks', '--workspace', str(workspace), '--host', host,
+                            '--project-root', str(project))
+        assert installed['runtime_discovery_verified'] is False
+
+    def run(argv, data, *, cwd=project):
+        result = subprocess.run(argv, cwd=cwd, input=json.dumps(data), text=True,
+                                capture_output=True, timeout=30)
+        assert result.returncode == 0 and not result.stderr, 'standalone adapter failed'
+        return json.loads(result.stdout)
+
+    adapters = {}
+    payload = {'hook_event_name': 'SessionStart', 'cwd': str(project), 'session_id': 'installed.synthetic'}
+    codex = json.loads((project / '.codex/hooks.json').read_text(encoding='utf-8'))
+    claude = json.loads((project / '.claude/settings.local.json').read_text(encoding='utf-8'))
+    for host, config in (('codex', codex), ('claude', claude)):
+        for event in ('SessionStart', 'UserPromptSubmit'):
+            handler = config['hooks'][event][0]['hooks'][0]
+            argv = ([handler['command'], *handler['args']] if host == 'claude'
+                    else [*shlex.split(handler['command']), '--probe'])
+            actual = run(argv, {**payload, 'hook_event_name': event})
+            context = actual['hookSpecificOutput']['additionalContext']
+            assert str(workspace) in context and 'experience-capture' in context
+            assert 'preview' in context.lower()
+            for cwd in (sibling, nested, project.parent):
+                assert run(argv, {**payload, 'hook_event_name': event, 'cwd': str(cwd)}) == {}
+        adapters[host] = {'bound_workspace_context': 'pass', 'foreign_scope_rejected': 'pass',
+                          'execution_kind': 'manual_adapter_process'}
+    assert not (sibling / '.codex').exists() and not (nested / '.codex').exists()
+    assert not (project / '.codex/resume-toolkit').exists(), 'checkpoint state escaped data workspace'
+    assert list((workspace / '.codex/resume-toolkit/sessions').glob('*.json'))
+
+    # Import the bundled Hermes plugin in an isolated process without Hermes or
+    # source-checkout imports. Its adapter contract is intentionally CLI-only.
+    loader = '''import importlib.util,json,sys
+from pathlib import Path
+folder=Path(sys.argv[1])
+spec=importlib.util.spec_from_file_location('_installed_hermes_probe',folder/'__init__.py',submodule_search_locations=[str(folder)])
+module=importlib.util.module_from_spec(spec)
+sys.modules[spec.name]=module
+spec.loader.exec_module(module)
+print(json.dumps(module._route(platform=sys.argv[2])))
+'''
+    plugin = project / '.hermes/plugins/resume-toolkit'
+    argv = [str(interpreter), '-I', '-c', loader, str(plugin), 'cli']
+    actual = run(argv, {})
+    assert str(workspace) in actual['context'] and 'experience-capture' in actual['context']
+    for cwd in (workspace, sibling, nested, project.parent):
+        assert run(argv, {}, cwd=cwd) is None
+    assert run([*argv[:-1], 'desktop'], {}) is None
+    adapters['hermes'] = {'bound_workspace_context': 'pass', 'foreign_scope_rejected': 'pass',
+                          'execution_kind': 'manual_adapter_process', 'supported_scope': 'dedicated CLI at project root'}
+    return {'status': 'pass', 'workspace': str(workspace), 'project_root': str(project),
+            'standard_profile_schema': True, 'repeat_setup_read_only': True,
+            'adapters': adapters, 'native_host_execution': 'unverified'}
 
 
 def main(argv=None):
@@ -70,6 +156,9 @@ def main(argv=None):
                        for check in diagnosis['checks'])
         report['deployments'].append({'host': host, 'repeat_setup': 'unchanged',
                                       'doctor_read_only': True, 'diagnostics': diagnosis['checks']})
+
+    report['project_deployment'] = verify_project_deployment(
+        args.output / 'single project', command, sys.executable)
 
     for profile in ('developer', 'researcher'):
         root = args.output / profile

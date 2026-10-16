@@ -3,6 +3,10 @@ prune tests
 prune docs
 prune tools
 prune outputs
+prune user-profile
+prune private
+prune .local
+prune .codex
 prune .agents
 prune .claude
 prune .hermes

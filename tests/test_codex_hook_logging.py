@@ -104,7 +104,11 @@ def test_logging_failure_does_not_break_routing(installed):
 
 def test_killed_process_leaves_started_record(installed):
     script = installed / '.codex/hooks/resume-toolkit/run.py'
-    proc = subprocess.Popen([sys.executable, '-I', str(script), '--workspace', str(installed), '--probe'],
+    # Windows venv python.exe can redirect to a separate interpreter process.
+    # The standalone bundle uses only stdlib, so launch the base interpreter
+    # directly and verify its PID before killing the actual blocked runner.
+    interpreter = getattr(sys, '_base_executable', None) or sys.executable
+    proc = subprocess.Popen([interpreter, '-I', str(script), '--workspace', str(installed), '--probe'],
                             stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     try:
         deadline = time.monotonic() + 10
@@ -114,8 +118,9 @@ def test_killed_process_leaves_started_record(installed):
         assert entry['stage'] == 'started' and entry['pid'] == proc.pid
         assert 'completed_at' not in entry
     finally:
-        proc.terminate()
+        proc.kill()
         proc.communicate(timeout=10)
+    assert proc.returncode != 0
     assert records(installed)[0]['stage'] == 'started'
 
 
