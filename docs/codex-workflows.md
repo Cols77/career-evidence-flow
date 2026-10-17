@@ -1,6 +1,6 @@
 # Codex lifecycle workflows
 
-Codex can load all four installed skills, route a private workspace through the canonical classifier, and restore an explicitly recorded workflow. Hooks supply advisory context; the CLI supplies selected-file SHA-256 comparisons. Neither authenticates reviewer identity, visual inspection, factual truth, or approval. Documents remain previews, with no guarded release.
+Codex can load all five installed skills, route a private workspace through the canonical classifier, and restore an explicitly recorded workflow. Hooks supply advisory context; the CLI supplies selected-file SHA-256 comparisons. Neither authenticates reviewer identity, visual inspection, factual truth, or approval. Documents remain previews, with no guarded release.
 
 ## Install and activate
 
@@ -15,7 +15,7 @@ Setup preserves existing candidate records. Skills install under the project roo
 
 The installer refuses an existing `hooks.json` or adapter directory and preserves them unchanged. For an intentional update or combination, back up and inspect the existing definitions, move the conflicting config/bundle aside yourself, install, then manually merge desired event groups. Preserve private session state separately under `.codex/resume-toolkit/`. Review the final exact hook definitions again.
 
-Start a fresh **local** Codex session in the project. Check `codex features list` for hooks availability, inspect `/hooks`, and explicitly trust the toolkit definitions. If your installed host requires enabling hooks, use its documented feature settings. The installer changes no feature setting, project trust, global configuration or hook trust. Confirm all four skills are discoverable and load one linked reference. Hook trust is separate from project/skill trust. Local hooks do not apply to cloud orchestration, even when it can run local commands. See [official hooks documentation](https://learn.chatgpt.com/docs/hooks).
+Start a fresh **local** Codex session in the project. Check `codex features list` for hooks availability, inspect `/hooks`, and explicitly trust the toolkit definitions. If your installed host requires enabling hooks, use its documented feature settings. The installer changes no feature setting, project trust, global configuration or hook trust. Confirm all five skills are discoverable and load one linked reference. Hook trust is separate from project/skill trust. Local hooks do not apply to cloud orchestration, even when it can run local commands. See [official hooks documentation](https://learn.chatgpt.com/docs/hooks).
 
 **Linked worktrees:** In Windows Codex CLI 0.162.1, we observed hook discovery resolve a linked worktree's `.codex/hooks.json` through the corresponding path in the primary checkout. A workspace-only installation can therefore appear absent in `/hooks`. The installer writes inside the selected project root; affected installations need a separate local activation of the hook configuration at the mapped primary-checkout path. Preserve the commands' original workspace paths, keep that configuration out of Git, and review and trust the discovered definitions through Codex. Recheck the mapped configuration after reinstalling or changing hooks. Confirm native execution using host events and the execution logs.
 
@@ -78,7 +78,12 @@ cv workflow-checkpoint --workspace "C:\private\candidate" --session-id SESSION_I
 cv workflow-status --workspace "C:\private\candidate" --session-id SESSION_ID
 ```
 
-Skills are `experience-capture`, `application-materials`, `resume-review`, `cover-letter-review`. Phases are `working`, `waiting_for_user`, `blocked`, `paused`, `finished`. All phases are declarations, including `finished`; none proves completion. The saved skill guides authorized continuation when canonical prerequisites permit it. Current user direction takes precedence. Waiting/paused/blocked work does not resume automatically. Compaction and resuming the same session retain its checkpoint. A genuinely new session ID starts empty.
+Skills are `experience-capture`, `application-materials`, `resume-review`, `cover-letter-review`, `job-search`. Phases are `working`, `waiting_for_user`, `blocked`, `paused`, `finished`. All phases are declarations, including `finished`; none proves completion. The saved skill guides authorized continuation when canonical prerequisites permit it. Current user direction takes precedence. Waiting/paused/blocked work does not resume automatically. Compaction and resuming the same session retain its checkpoint. A genuinely new session ID starts empty.
+
+Select `job-search` explicitly when finding opportunities. It reads canonical
+private preferences and saves sourced job assessments under ignored outputs.
+The default populated-profile route remains `application-materials`; hooks do
+not schedule searches, browse employers or write preferences on their own.
 
 For a new conversation, explicitly inspect the previous session with `workflow-status --session-id OLD_ID`, reconcile its records against the current request and canonical files, then record an appropriate checkpoint with the **new** hook-supplied ID. This is a deliberate host action, not automatic state copying. Child reviewers without their own hook metadata return findings to the author; they must not overwrite the author's checkpoint using its session ID.
 

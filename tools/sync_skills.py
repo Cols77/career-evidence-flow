@@ -3,7 +3,7 @@ import argparse
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-SKILLS = ('experience-capture', 'application-materials', 'resume-review', 'cover-letter-review')
+SKILLS = ('experience-capture', 'application-materials', 'resume-review', 'cover-letter-review', 'job-search')
 TARGETS = ('.agents/skills', '.claude/skills', 'src/cv_toolkit/assets/skills')
 
 

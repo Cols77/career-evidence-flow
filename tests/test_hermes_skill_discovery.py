@@ -1,6 +1,6 @@
 """Real-Hermes discovery of the workspace's installed project skills.
 
-The project ships four canonical skills (``cv_toolkit.bootstrap.SKILLS``) that
+The project ships five canonical skills (``cv_toolkit.bootstrap.SKILLS``) that
 are installed into ``<root>/.hermes/skills/`` by ``install_skills``.  These
 resume-toolkit skills are *project* skills in Hermes' native discovery model
 (``agent.skill_utils``): they load only when the process runs inside the git

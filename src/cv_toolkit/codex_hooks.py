@@ -21,7 +21,7 @@ from .onboarding import STATE_TO_SKILL, classify
 from .hook_scope import bound_workspace, in_scope
 from .records import ToolkitError, _decode, atomic_write_json, confined, load_json, object_fields
 
-SKILLS = ('experience-capture', 'application-materials', 'resume-review', 'cover-letter-review')
+SKILLS = ('experience-capture', 'application-materials', 'resume-review', 'cover-letter-review', 'job-search')
 PHASES = ('working', 'waiting_for_user', 'blocked', 'paused', 'finished')
 EVENTS = ('SessionStart', 'UserPromptSubmit', 'PreCompact', 'Interrupt', 'Stop')
 MAX_INPUT = 256_000

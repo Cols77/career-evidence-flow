@@ -1,5 +1,22 @@
 # Resume Toolkit
 
+Reusable application commands replace per-job rendering and review-packet scripts:
+
+```text
+cv application-context --workspace ROOT --application applications/SLUG
+cv build-application --workspace ROOT --application applications/SLUG --output outputs/SLUG/r01
+cv verify-bundle --workspace ROOT --bundle outputs/SLUG/r01/bundle.json
+```
+
+The host writes the evidence-backed Markdown first. Builds use the application's
+deliverable/page policy, create ATS/branded previews and a letter when requested,
+run checks, and save frozen inputs plus hashes for independent review. Add repeated
+`--include` options for actual source documents, prior answers and support notes.
+Use `--page-images` with the optional `visual` extra to rasterize every PDF page.
+All commands work through the same CLI in Codex, Claude Code and Hermes; no MCP
+server is required. Bundles remain unreviewed previews until actual review, and
+selected-file freshness never grants submission approval.
+
 Generate a resume and cover letter with an AI agent, grounded in the candidate's real experience. The agent interviews you where evidence is missing, maps your background to the full job description, drafts the requested documents and coordinates independent reviews.
 
 The agent workflows are the product entrypoint. Python supplies the evidence validators, application records and document renderer. Those helpers run locally without an API key; your chosen AI host supplies the model, conversation, browsing and agent tools.
@@ -8,6 +25,7 @@ The agent workflows are the product entrypoint. Python supplies the evidence val
 
 | Skill | Use it to |
 | --- | --- |
+| [job-search](skills/job-search/SKILL.md) | Find current jobs, save search preferences, assess evidence and eligibility, and check application requirements |
 | [application-materials](skills/application-materials/SKILL.md) | Run the job-to-resume-and-letter workflow, including material questions and review handoffs |
 | [experience-capture](skills/experience-capture/SKILL.md) | Capture real experience with sources, ownership and limitations |
 | [resume-review](skills/resume-review/SKILL.md) | Independently review evidence, job fit, voice, ATS output and layout |
@@ -74,7 +92,7 @@ The host freezes supplied job text with `cv create-application`, maps requiremen
 
 ## Current implementation boundary
 
-The four agent skills include interview procedures, drafting steps, schema examples and independent review rubrics. The helpers validate evidence/source joins, projections, frozen job bytes, requirements and questions; persist answers and corrections; render HTML/PDF previews; and check document text and limits.
+The five agent skills include interview procedures, drafting steps, schema examples and independent review rubrics. The helpers validate evidence/source joins, projections, frozen job bytes, requirements and questions; persist answers and corrections; render HTML/PDF previews; and check document text and limits.
 
 The full guarded release system remains unfinished: exhaustive claim maps, authenticated reviewer records, complete dependency invalidation, enforced repair rounds and immutable reviewed-byte release. `cv status` always reports `draft_only` and `release_available: false`. Files are previews; successful checks do not certify submission readiness. See [review and release](docs/review-and-release.md). Native host discovery and full host acceptance must be demonstrated separately from installing files or running tests.
 

@@ -35,7 +35,7 @@ def test_routes_canonical_state_without_storing_prompt_or_candidate(workspace):
     assert 'session.one' not in text
 
 
-@pytest.mark.parametrize('skill', ['experience-capture', 'application-materials', 'resume-review', 'cover-letter-review'])
+@pytest.mark.parametrize('skill', ['experience-capture', 'application-materials', 'resume-review', 'cover-letter-review', 'job-search'])
 def test_restores_declared_workflow_without_approval(workspace, skill):
     hooks.record_checkpoint(workspace, 'session.one', skill, 'waiting_for_user', [])
     result = hooks.dispatch(payload(workspace, source='compact'), workspace)

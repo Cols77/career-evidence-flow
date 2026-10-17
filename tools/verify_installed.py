@@ -9,8 +9,32 @@ import json
 from pathlib import Path
 import re
 import shlex
+import shutil
 import subprocess
 import sys
+
+
+def verify_application_bundle(root, command):
+    """Exercise reusable commands using only packaged fictional content."""
+    root = Path(root)
+    (root / 'bundle-job.txt').write_text('Build and test Python services.', encoding='utf-8')
+    command('create-application', '--workspace', str(root), '--slug', 'bundle-example',
+            '--job', 'bundle-job.txt', '--company', 'Example Organization', '--title', 'Engineer')
+    application = root / 'applications/bundle-example'
+    path = application / 'application.json'
+    manifest = json.loads(path.read_text(encoding='utf-8'))
+    manifest['extraction_complete'] = True
+    path.write_text(json.dumps(manifest), encoding='utf-8')
+    shutil.copyfile(root / 'resume.md', application / 'resume.md')
+    shutil.copyfile(root / 'letter.md', application / 'cover-letter.md')
+    context = command('application-context', '--workspace', str(root), '--application', 'applications/bundle-example')
+    assert context['pending_questions'] == []
+    built = command('build-application', '--workspace', str(root), '--application', 'applications/bundle-example',
+                    '--output', 'outputs/bundle-example/r01', '--format', 'html')
+    assert set(built['documents']) == {'resume-ats.html', 'resume-branded.html', 'cover-letter.html'}
+    verified = command('verify-bundle', '--workspace', str(root), '--bundle', built['bundle'])
+    assert verified['freshness'] == 'fresh' and verified['release_available'] is False
+    return {'status': 'pass', 'review_status': built['review_status'], 'freshness': verified['freshness']}
 
 
 def verify_project_deployment(project, command, interpreter):
@@ -105,6 +129,7 @@ def main(argv=None):
     args = parser.parse_args(argv)
     import cv_toolkit
     from cv_toolkit import ats, letter_check
+    from cv_toolkit.bootstrap import SKILLS
     from cv_toolkit.render import RESUME_STYLES, render_pdf
 
     imported = Path(cv_toolkit.__file__).resolve()
@@ -167,10 +192,10 @@ def main(argv=None):
         command('validate-projection', '--workspace', str(root))
         for host in ('codex', 'claude', 'hermes'):
             record = command('install-skills', '--workspace', str(root), '--host', host)
-            assert record['skill_count'] == 4
+            assert record['skill_count'] == len(SKILLS)
             assert record['runtime_discovery_verified'] is False
             prefix = prefixes[host]
-            for skill in ('experience-capture', 'application-materials', 'resume-review', 'cover-letter-review'):
+            for skill in SKILLS:
                 folder = root / prefix / skill
                 pages = list(folder.rglob('*.md'))
                 assert len(pages) >= 2, 'installed skill references missing'
@@ -212,6 +237,7 @@ def main(argv=None):
         assert (root / 'applications/synthetic-role/job.txt').read_bytes() == raw_job
         state = command('status', '--workspace', str(root), '--application', 'applications/synthetic-role')
         assert state['readiness'] == 'draft_only' and state['release_available'] is False
+        report.setdefault('application_bundles', []).append(verify_application_bundle(root, command))
         report['profiles'].append(profile)
     gallery = args.output / 'visual-gallery'
     command('gallery', '--output', str(gallery), '--format', 'both')

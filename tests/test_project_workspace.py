@@ -108,7 +108,7 @@ def test_install_skills_uses_explicit_project_root(tmp_path, capsys):
     workspace = init_workspace(tmp_path / 'user-profile')
     code, result = invoke(capsys, 'install-skills', '--workspace', str(workspace), '--host', 'codex', '--project-root', str(tmp_path))
     assert code == 0
-    assert result['skill_count'] == 4
+    assert result['skill_count'] == len(SKILLS)
     assert (tmp_path / '.agents/skills/experience-capture/SKILL.md').is_file()
     assert not (workspace / '.agents').exists()
 

@@ -24,6 +24,20 @@ def test_release_allowlist_contains_all_standalone_adapter_modules():
     sources = tool.release_sources(ROOT)
     assert 'src/cv_toolkit/claude_hooks.py' in sources
     assert 'src/cv_toolkit/hook_scope.py' in sources
+    assert 'src/cv_toolkit/page_layout.py' in sources
+    assert 'src/cv_toolkit/application_tools.py' in sources
+
+
+def test_verifier_exercises_reusable_application_commands(tmp_path):
+    def command(*args):
+        captured = io.StringIO()
+        with contextlib.redirect_stdout(captured):
+            assert main(list(args)) == 0
+        return json.loads(captured.getvalue())
+    root = tmp_path / 'fictional'
+    command('init', str(root), '--example', 'developer')
+    result = load_tool('verify_installed').verify_application_bundle(root, command)
+    assert result == {'status': 'pass', 'review_status': 'unreviewed_preview', 'freshness': 'fresh'}
 
 
 def test_verifier_executes_split_workspace_adapters_and_rejects_wrong_scopes(tmp_path):

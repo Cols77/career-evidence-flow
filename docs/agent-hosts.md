@@ -20,7 +20,7 @@ workspace based on the first employer folder or a global `cv` executable.
 
 Launch Codex from this checkout. Its project copies are in `.agents/skills/`; explicitly request `$application-materials` or ask it to use that skill. `AGENTS.md` also provides a manual entrypoint. Codex documents repository discovery in `.agents/skills` from the current directory to the repository root. See [official OpenAI documentation](https://learn.chatgpt.com/docs/build-skills).
 
-For a separate private workspace, run `cv install-skills --workspace ROOT --host codex`, start the host there and confirm the four skill names are visible. If its discovery rules require a repository root, keep that workspace in a private local Git repository. Existing skill folders are not replaced.
+For a separate private workspace, run `cv install-skills --workspace ROOT --host codex`, start the host there and confirm the five skill names are visible. If its discovery rules require a repository root, keep that workspace in a private local Git repository. Existing skill folders are not replaced.
 
 `cv install-hooks --workspace ROOT --host codex` installs native local lifecycle definitions and a standalone adapter. It reuses the canonical onboarding classifier and restores explicit session checkpoints across resume/compaction. It never changes feature settings or grants hook trust. See [Codex workflows](codex-workflows.md) for activation, isolation, checkpoint/freshness commands, delivery probes and tested versus unverified surfaces. Selected-byte freshness does not authenticate reviews or guard release.
 
@@ -70,7 +70,7 @@ The hook is scoped and advisory:
 - It returns `pre_llm_call` user context each turn, routing the agent to the workflow determined by the read-only `cv onboard --workspace ROOT` classifier (`experience-capture` for capture/interview/import, `application-materials` when ready, etc.).
 - It is **advisory routing, not a sandbox**: structural validity does not prove factual truth, and approval/release is never asserted. It validates local records including claim text, but does not follow original source documents or include candidate claim text in routing context.
 
-Verify in a fresh, dedicated CLI session at `ROOT` that the plugin and the four skills are listed, then run a synthetic job-to-preview scenario. Do not claim production acceptance from fixture records.
+Verify in a fresh, dedicated CLI session at `ROOT` that the plugin and the five skills are listed, then run a synthetic job-to-preview scenario. Do not claim production acceptance from fixture records.
 
 ## Other hosts and manual loading
 
@@ -107,6 +107,8 @@ Give the host `AGENTS.md` and the full path to `skills/application-materials/SKI
 
 ## Acceptance evidence
 
+New Codex and Claude command-hook installations use a 120-second timeout to allow slow local Python startup and workspace checks. Codex Interrupt handlers retain their documented three-second maximum. The installer does not overwrite an existing installation; when updating one, preserve unrelated handlers/settings, back up its configuration and change only toolkit definitions. These settings are seconds, not milliseconds. A successful manual runner probe verifies the runner, not host delivery or trust. [Codex hook documentation](https://learn.chatgpt.com/docs/hooks) requires review/trust of changed non-managed definitions through `/hooks`; the toolkit does not bypass that trust decision.
+
 Automated tests check distribution consistency, reference resolution and installation without overwrites. A wheel installation should also be exercised outside the checkout. A manual agent scenario can prove that the instructions guide actual tool use, but does not prove native discovery in another host.
 
 `tests/test_entry_hook.py` exercises real Hermes lifecycle dispatch without
@@ -120,4 +122,4 @@ These tests use an isolated `HERMES_HOME` and no inference calls; they skip when
 no Hermes interpreter is available. They prove API discovery, not a desktop
 menu or a complete live-agent drafting/review run.
 
-To verify native discovery, start a fresh session in the chosen scope, confirm the four skills in its index/menu, load application-materials and one linked reference, and run a synthetic job-to-preview scenario. Preserve actual host/version, scope and tool outcomes in private local verification notes. Do not use fixture review records to claim production acceptance. No global host configuration, trust or paid provider calls are changed by the installer.
+To verify native discovery, start a fresh session in the chosen scope, confirm the five skills in its index/menu, load application-materials and one linked reference, and run a synthetic job-to-preview scenario. Preserve actual host/version, scope and tool outcomes in private local verification notes. Do not use fixture review records to claim production acceptance. No global host configuration, trust or paid provider calls are changed by the installer.

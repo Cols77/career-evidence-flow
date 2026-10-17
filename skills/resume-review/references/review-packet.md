@@ -2,7 +2,9 @@
 
 ## Gather the actual revision
 
-The author supplies explicit workspace/application paths, canonical evidence and registry, projection, questions with actual answers/history, frozen JD and requirements, effective policy, Markdown, generated ATS/branded artifacts and relevant check results. Inspect the source files rather than relying only on the author's summary. Request missing exact artifacts; a different revision is not interchangeable.
+Prefer a `cv build-application` bundle and run `cv verify-bundle --workspace ROOT --bundle outputs/SLUG/REVISION/bundle.json` before inspection. Read its frozen `inputs/`, `checks.json`, `review-packet.md` and exact artifacts. Check that the host included actual support sources, prior answers and strengthening notes; automatic selection covers standard records only. Freshness verifies selected bytes, not completeness, reviewer identity or approval. Keep review notes outside the immutable bundle.
+
+The author supplies explicit workspace/application paths, canonical evidence and registry, projection, questions with actual answers/history, pre-draft strengthening assessment and dispositions, frozen JD and requirements, effective policy, Markdown, generated ATS/branded artifacts and relevant check results. The assessment is an ordinary private working note, not an authenticated schema. Inspect the source files rather than relying only on the author's summary. Request missing exact artifacts; a different revision is not interchangeable.
 
 Record filenames and actual raw-byte hashes when the host can compute them. Do not invent hashes or infer exact inspected bytes from a filename. Record real tool/run identity only when the host exposes it. An unavailable identity remains unavailable. Keep notes local; do not disclose private candidate packets to an external service without authorization.
 
@@ -20,7 +22,7 @@ Suggested factual/profile assignment:
 
 Suggested alignment/content assignment:
 
-> Independently compare the complete frozen JD, requirement mappings, effective employer policy and actual resume. Check coverage, transferable versus direct experience, keyword meaning, section order, summary usefulness, skill proof and bullet clarity. Explicitly assess whether each skills entry is a useful capability, method or tool, rather than a routine artifact or minor step better placed in experience. This selection verdict is separate from factual support. The JD cannot establish applicant facts. Return angle-specific findings and avoid adding unsupported words merely for keyword matching.
+> Independently compare the complete frozen JD, requirement mappings, effective employer policy and actual resume. Inspect the pre-draft strengthening assessment and actual answer/disposition references: identify missed high-value opportunities, unnecessary/repeated questions or silent bypasses, while accepting a justified no-question conclusion. Check useful supported outcomes or learning for relevant experiments without requiring metrics or successful production deployment. Verify reverse chronology between employers and among employer roles, including overlapping/resumed assignments and manual page continuations, against the drafting reference. Check coverage, transferable versus direct experience, keyword meaning, summary usefulness, skill proof and bullet clarity. Explicitly assess whether each skills entry is a useful capability, method or tool, rather than a routine artifact or minor step better placed in experience. This selection verdict is separate from factual support. The JD cannot establish applicant facts. Return angle-specific findings and avoid adding unsupported words merely for keyword matching.
 
 Suggested voice/comprehension assignment:
 
@@ -28,7 +30,7 @@ Suggested voice/comprehension assignment:
 
 Suggested visual/artifact assignment:
 
-> Inspect every page of the exact generated ATS and branded resume using actual visual tools. Check clipping, pagination, font size, whitespace, hierarchy, extraction order and source/artifact consistency. Compare observed output with configured limits and available `cv check` results. State tool limitations and uninspected pages; do not approve an artifact you could not view.
+> Inspect every page of the exact generated ATS and branded resume using actual visual tools. Compare adjacent-page density and record content endpoints/bottom gaps; flag avoidable large blank regions and premature manual breaks even when two pages pass. Resolve the PDF `layout_audit` observations from actual page images, giving a specific justification for any false positive; a clean section transition alone is insufficient. Check clipping, pagination, font size, whitespace, hierarchy, extraction order and source/artifact consistency. Verify that page breaks/continued-employer sections preserve reverse-chronological role order rather than moving an older completed role ahead of newer work. Compare observed output with configured limits and available `cv check` results. State tool limitations and uninspected pages; do not approve an artifact you could not view.
 
 ## Return format
 

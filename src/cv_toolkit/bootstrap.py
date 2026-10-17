@@ -8,7 +8,7 @@ import sys
 from .records import ToolkitError, atomic_write_json, confined, load_json, nonempty, object_fields, schema
 
 
-SKILLS = ('experience-capture', 'application-materials', 'resume-review', 'cover-letter-review')
+SKILLS = ('experience-capture', 'application-materials', 'resume-review', 'cover-letter-review', 'job-search')
 EXAMPLES = ('developer', 'researcher', 'showcase')
 
 
@@ -205,7 +205,7 @@ def _install_codex_hook(root, project=None):
     windows = '& ' + ' '.join("'" + arg.replace("'", "''") + "'" for arg in argv)
     command = shlex.join(argv)
     hooks = {event: [{'hooks': [{'type': 'command', 'command': command,
-              'commandWindows': windows, 'timeout': 3 if event == 'Interrupt' else 10}]}]
+              'commandWindows': windows, 'timeout': 3 if event == 'Interrupt' else 120}]}]
              for event in EVENTS}
     # Complete all resource reads/path checks before writing any installation.
     destinations = [(confined(project, (target / relative).relative_to(project).as_posix(), required=False), raw)
@@ -253,7 +253,7 @@ def _install_claude_hook(root, project):
         payload.append((f'cv_toolkit/{module}', files('cv_toolkit').joinpath(module).read_bytes()))
     # Claude's documented exec form avoids shell interpretation on all platforms.
     handler = {'type': 'command', 'command': str(Path(sys.executable).resolve()),
-               'args': ['-I', str(target / 'run.py'), '--workspace', str(root)], 'timeout': 10}
+               'args': ['-I', str(target / 'run.py'), '--workspace', str(root)], 'timeout': 120}
     for event in EVENTS:
         hooks.setdefault(event, []).append({'hooks': [dict(handler)]})
     destinations = [(confined(project, (target / relative).relative_to(project).as_posix(), required=False), raw)

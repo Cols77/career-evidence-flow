@@ -74,13 +74,15 @@ Prepare a short evidence inventory, then ask questions whose answers change the 
 | --- | --- | --- |
 | Ownership | Which part did you personally implement, and which belonged to the team? | State participation without claiming leadership. |
 | Maturity | Was this local, tested with users, deployed internally or operated in production? | Preserve prototype/coursework wording. |
-| Outcome | What was measured, over what period, and from which source? | Describe work without a numeric impact claim. |
+| Outcome or learning | What changed, was demonstrated or learned, how was it checked, and what decision did it enable? Ask about measurements only where relevant. | After the question is answered, declined or explicitly skipped, prioritise stronger evidence or describe the work narrowly without inventing an outcome. |
 | Skill | Where did you use it, and what can you explain or demonstrate? | Omit unsupported proficiency. |
 | Award | Was the award individual or team-based, and what did it recognize? | Preserve team attribution. |
 | Identity/contact | What name/contact details may appear in this application? | Leave unprovided contacts out. |
 | Motivation | What about this role matters to you, based on your actual interests or experience? | Acknowledge the application purpose without invented enthusiasm. |
 
-Reuse sufficient answers. Do not ask for every possible metric, mandate a training section, or invent a language level. In a headless run, list only missing material questions and continue supported drafting.
+For application work, start from the key JD needs and the candidate's actual strongest evidence, not a checklist of missing keywords. A technically true experiment label may leave a valuable outcome or learning unexamined. Ask about its purpose, personal contribution, evaluation/observation and result only where those details could change the resume. Qualitative findings, failed approaches, limitations and decisions can be useful evidence; do not infer them or demand a numeric/business result. Do not automatically include an experiment merely because it names a relevant technology.
+
+Reuse sufficient answers. Do not ask for every possible metric, mandate a training section, invent a language level or reopen a previously declined/resolved gap. Record why no useful question remains when existing evidence is sufficient; do not manufacture a question to satisfy the workflow. When a material strengthening question remains, wait for an actual answer or explicit instruction to skip/proceed before dependent drafting or eligibility/core-fit decisions. A noncritical item may remain pending and be explicitly excluded while independent drafting uses other sufficient confirmed evidence; exclusion is not an answer or waiver. In a headless run without a permissible disposition, list the pending questions and continue independent preparation, not the affected claims. Unknown/declined answers permit supported narrowing or omission once recorded.
 
 ## Actual answers and corrections
 

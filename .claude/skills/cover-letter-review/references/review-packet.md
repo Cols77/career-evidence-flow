@@ -2,6 +2,8 @@
 
 ## Actual inputs
 
+Prefer a `cv build-application` bundle and run `cv verify-bundle --workspace ROOT --bundle outputs/SLUG/REVISION/bundle.json` before inspection. Review frozen inputs, checks and exact letter/resume artifacts together. Require actual motivation/support sources and prior answers in the explicit `--include` selection. Freshness verifies selected bytes only, never packet completeness, independent review or approval. Store review notes outside the immutable bundle.
+
 Read canonical evidence and registry, selected projection, actual application answers with corrections, complete frozen JD and requirements, effective employer policy, current final resume, letter source, generated letter and exact check results. The final resume is a dependency, not an optional contextual summary. A changed resume makes prior letter consistency review stale.
 
 Use explicit local authorized paths. Read actual source and artifacts rather than the author's summary. Record actual raw-byte hashes if the host can compute them; otherwise name the revision and state that exact-byte verification is unavailable. Keep candidate information local unless external disclosure is authorized. Source registry fingerprints do not authenticate underlying bytes.

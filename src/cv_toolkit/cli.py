@@ -63,9 +63,20 @@ def _parser():
     gallery.add_argument('--output', type=Path, required=True, help='New directory for the comparison')
     gallery.add_argument('--format', choices=('html', 'both'), default='html',
                          help='HTML comparison, optionally with PDF previews (requires Chromium)')
-    for command in ('onboard', 'validate-evidence', 'validate-projection', 'render', 'check', 'install-skills', 'install-hooks', 'create-application', 'status', 'answer', 'resolve-question', 'workflow-checkpoint', 'workflow-status'):
+    for command in ('onboard', 'validate-evidence', 'validate-projection', 'render', 'check', 'install-skills', 'install-hooks', 'create-application', 'status', 'answer', 'resolve-question', 'workflow-checkpoint', 'workflow-status', 'application-context', 'build-application', 'verify-bundle'):
         item = sub.add_parser(command)
         item.add_argument('--workspace', type=Path, required=True)
+        if command in ('application-context', 'build-application'):
+            item.add_argument('--application', required=True, help='Workspace-relative application directory')
+        if command == 'build-application':
+            from .render import RESUME_STYLES
+            item.add_argument('--output', required=True, help='New revision directory under configured outputs')
+            item.add_argument('--format', choices=('html', 'both'), default='both')
+            item.add_argument('--style', choices=RESUME_STYLES, action='append', help='Repeat for resume variants; default: ats and branded')
+            item.add_argument('--include', action='append', default=[], help='Extra workspace-relative source, prior answer or support note to snapshot')
+            item.add_argument('--page-images', action='store_true', help='Rasterize every PDF page (requires visual extra)')
+        if command == 'verify-bundle':
+            item.add_argument('--bundle', required=True, help='Workspace-relative bundle.json')
         if command in ('workflow-checkpoint', 'workflow-status'):
             item.add_argument('--session-id', required=True)
         if command == 'workflow-checkpoint':
@@ -146,7 +157,17 @@ def main(argv=None):
                 result.update(checkpoint_status(args.workspace, args.session_id))
         else:
             ws = Workspace.load(args.workspace)
-            if args.command == 'validate-evidence':
+            if args.command in ('application-context', 'build-application', 'verify-bundle'):
+                from .application_tools import application_context, build_application, verify_bundle
+                if args.command == 'application-context':
+                    result.update(application_context(ws, args.application))
+                elif args.command == 'build-application':
+                    result.update(build_application(ws, args.application, args.output,
+                                  output_format=args.format, styles=tuple(args.style or ('ats', 'branded')),
+                                  includes=args.include, page_images=args.page_images))
+                else:
+                    result.update(verify_bundle(ws, args.bundle))
+            elif args.command == 'validate-evidence':
                 record, registry = _profile(ws, args.evidence, args.registry)
                 result['claim_count'] = len(claim_index(record, registry))
             elif args.command == 'validate-projection':

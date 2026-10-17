@@ -1,7 +1,7 @@
 # Install for Codex, Claude Code or Hermes
 
 Install one Python package, then set up a private workspace for your chosen host.
-The package includes the four skills and their references, resume styles,
+The package includes the five skills and their references, resume styles,
 fictional examples, validators and renderer. It does not include candidate data,
 model credentials or a model provider. Python 3.11 or newer is required;
 Chrome/Chromium is required only for PDF rendering.
@@ -110,7 +110,7 @@ This integration targets local agent hosts with filesystem and command tools;
 ordinary web chat is not an equivalent runtime.
 
 Launch a fresh session from the project root (the checkout in the single-repo
-layout). Confirm the four skills appear
+layout). Confirm the five skills appear
 and load one linked reference. Some hosts require a recognized Git project and
 explicit trust. If needed, initialize a **private local** Git repository there;
 the toolkit does not create a remote or publish candidate records. Hermes project

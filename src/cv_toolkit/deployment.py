@@ -50,6 +50,11 @@ unavailable, ask the agent to read the selected directory's
 Codex uses `$experience-capture` / `$application-materials`; Claude Code and
 Hermes use `/experience-capture` / `/application-materials` after discovery.
 
+For opportunity discovery, use `$job-search` in Codex or `/job-search` in Claude
+Code/Hermes, or read `job-search/SKILL.md` in the selected skills directory.
+It saves private preferences and assesses current jobs before a selected role
+enters application drafting; installation does not start automatic searches.
+
 For example: "Use the explicit data workspace above. Read RESUME_TOOLKIT.md,
 run the onboard command above, load the returned skill and its
 references, and help me capture my experience or prepare application previews."
@@ -98,7 +103,7 @@ def _conflict(host):
     return DeploymentError(
         f'{host} skill conflict in {HOSTS[host]}: an altered, partial or aliased '
         'toolkit skill set exists. Back up your changes, compare with the package, '
-        'then move all four toolkit skill directories aside together and rerun '
+        'then move all five toolkit skill directories aside together and rerun '
         'setup. Unrelated skills can stay. No requested host was installed.'
     )
 
@@ -255,13 +260,13 @@ def setup(root, *, host, name='Candidate', example=None, project_root=None):
             'next_step': 'Read RESUME_TOOLKIT.md and run cv doctor for this workspace and host.'}
 
 
-def _git(root, *args):
+def _git(root, *args, input=None):
     try:
         # check-ignore consumes literal filenames and rejects literal pathspec
         # magic; ls-files does accept pathspecs and needs the explicit flag.
         options = ['--literal-pathspecs'] if args[0] == 'ls-files' else []
         return subprocess.run(['git', '--no-optional-locks', *options,
-                               '-C', str(root), *args], capture_output=True,
+                               '-C', str(root), *args], capture_output=True, input=input,
                               timeout=10, check=False)
     except (OSError, subprocess.TimeoutExpired):
         return None

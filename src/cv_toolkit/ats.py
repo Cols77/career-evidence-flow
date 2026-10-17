@@ -12,6 +12,7 @@ from pypdf.errors import PdfReadError
 
 from .render import _safe_href
 from .artifact_audit import observe
+from .page_layout import observe_page_balance
 
 
 class _DocumentText(HTMLParser):
@@ -183,9 +184,12 @@ def _check_document(path, candidate, policy, kind):
                 issue('word_count_max', 'Letter has more words than the configured maximum.')
     except (ValueError, TypeError):
         issue('invalid_policy', 'Invalid document check policy.')
-    return {'status': 'fail' if issues else 'pass', 'issues': issues,
+    result = {'status': 'fail' if issues else 'pass', 'issues': issues,
             'findings': [item['message'] for item in issues], 'word_count': word_count, 'pages': pages,
             'artifact_audit': observe(text, reader=reader, readable=readable)}
+    if kind == 'resume':
+        result['layout_audit'] = observe_page_balance(reader)
+    return result
 
 
 def check(doc_path, candidate, policy=None) -> dict:
