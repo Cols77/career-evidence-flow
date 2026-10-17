@@ -63,7 +63,7 @@ def _parser():
     gallery.add_argument('--output', type=Path, required=True, help='New directory for the comparison')
     gallery.add_argument('--format', choices=('html', 'both'), default='html',
                          help='HTML comparison, optionally with PDF previews (requires Chromium)')
-    for command in ('onboard', 'validate-evidence', 'validate-projection', 'render', 'check', 'install-skills', 'install-hooks', 'create-application', 'status', 'answer', 'resolve-question', 'workflow-checkpoint', 'workflow-status', 'application-context', 'build-application', 'verify-bundle'):
+    for command in ('onboard', 'validate-evidence', 'validate-projection', 'render', 'check', 'install-skills', 'install-hooks', 'install-agent', 'create-application', 'status', 'answer', 'resolve-question', 'workflow-checkpoint', 'workflow-status', 'application-context', 'build-application', 'verify-bundle'):
         item = sub.add_parser(command)
         item.add_argument('--workspace', type=Path, required=True)
         if command in ('application-context', 'build-application'):
@@ -99,9 +99,11 @@ def _parser():
             item.add_argument('--document', required=True)
             item.add_argument('--kind', choices=('resume', 'cover_letter'), default='resume')
             item.add_argument('--policy', help='Workspace-relative effective policy JSON')
-        if command in ('install-skills', 'install-hooks'):
+        if command in ('install-skills', 'install-hooks', 'install-agent'):
             item.add_argument('--host', choices=('codex', 'claude', 'hermes'), required=True)
-            item.add_argument('--project-root', type=Path, help='Explicit host discovery root containing the data workspace')
+            item.add_argument('--project-root', type=Path, required=command == 'install-agent', help='Explicit host discovery root containing the data workspace')
+        if command == 'install-agent':
+            item.add_argument('--hooks', action='store_true', help='Install advisory hook files; refresh previously managed hooks on repeats')
         if command == 'create-application':
             item.add_argument('--slug', required=True)
             item.add_argument('--job', required=True, help='Workspace-relative full supplied job text file')
@@ -137,6 +139,10 @@ def main(argv=None):
         elif args.command == 'doctor':
             from .deployment import doctor
             result.update(doctor(args.workspace, host=args.host, project_root=args.project_root))
+        elif args.command == 'install-agent':
+            from .host_installation import install_agent
+            result.update(install_agent(args.workspace, host=args.host,
+                          project_root=args.project_root, hooks=args.hooks))
         elif args.command == 'gallery':
             from .gallery import render_gallery
             result.update(render_gallery(args.output, include_pdf=args.format == 'both'))

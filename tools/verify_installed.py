@@ -14,6 +14,49 @@ import subprocess
 import sys
 
 
+def verify_checkout_installers(project, checkout, interpreter):
+    """Exercise all real bootstrap commands in one fresh, empty private project.
+
+    Requires network access for pip. Host providers/trust are never configured.
+    This is an explicit maintainer smoke test, not part of offline unit tests.
+    """
+    project, checkout = Path(project).resolve(), Path(checkout).resolve()
+    project.mkdir(parents=True, exist_ok=False)
+    subprocess.run(['git', 'init', '-q', str(project)], check=True)
+    reports = []
+    for host in ('codex', 'claude', 'hermes', 'codex'):
+        command = [str(interpreter), str(checkout / 'install.py'), host,
+                   '--project', str(project), '--hooks']
+        result = subprocess.run(command, cwd=project.parent, capture_output=True,
+                                text=True, encoding='utf-8', timeout=1200)
+        if result.returncode:
+            (project / 'installer-failure.txt').write_text(result.stdout + '\n' + result.stderr, encoding='utf-8')
+            raise AssertionError('bootstrap failed; inspect the synthetic project installer-failure.txt')
+        report = json.loads(result.stdout)
+        assert report['status'] == 'ok' and report['host'] == host
+        assert report['installation']['runtime_discovery_verified'] is False
+        assert report['diagnostics']['status'] == 'ok'
+        assert report['native_host_execution_verified'] is False
+        if reports:
+            assert report['environment'] == reports[0]['environment']
+            assert report['package_updated'] is False
+        reports.append(report)
+    assert reports[-1]['installation']['skills'] == 'unchanged'
+    assert reports[-1]['installation']['hooks'] == 'unchanged'
+    runtime_python = Path(reports[0]['environment']) / ('Scripts/python.exe' if sys.platform == 'win32' else 'bin/python')
+    visual = subprocess.run([str(runtime_python), '-I', '-c', 'import pymupdf'],
+                            capture_output=True, text=True, timeout=60)
+    assert visual.returncode == 0 and not visual.stdout, 'default visual extra missing or polluted stdout'
+    evidence = json.loads((project / 'user-profile/profile/evidence.json').read_text(encoding='utf-8'))
+    assert evidence['items'] == []
+    report = {'status': 'pass', 'hosts': ['codex', 'claude', 'hermes'],
+              'repeat_installation': 'unchanged', 'shared_environment': True,
+              'profile_initialized_empty': True, 'native_host_execution': 'unverified', 'runs': reports}
+    report['visual_extra_import'] = 'pass'
+    (project / 'installer-results.json').write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
+    return report
+
+
 def verify_application_bundle(root, command):
     """Exercise reusable commands using only packaged fictional content."""
     root = Path(root)

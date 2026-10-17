@@ -1,4 +1,5 @@
 # Source releases are installable package source, not candidate workspaces.
+include install.py
 prune tests
 prune docs
 prune tools

@@ -176,11 +176,16 @@ def install_entry_hook(root, host, *, project_root=None):
     return len(payload)
 
 
-def _install_codex_hook(root, project=None):
+def codex_hook_payload(root, project):
+    """Plan exact standalone hook bytes without modifying files."""
+    return _install_codex_hook(root, project, _payload_only=True)
+
+
+def _install_codex_hook(root, project=None, *, _payload_only=False):
     """Write a standalone native hook bundle; never merge config or grant trust."""
     from .codex_hooks import EVENTS
 
-    root = Path(root).resolve(strict=True)
+    root = Path(root).resolve(strict=not _payload_only)
     project = project or root
     config = confined(project, '.codex/hooks.json', required=False)
     target = confined(project, '.codex/hooks/resume-toolkit', required=False)
@@ -188,7 +193,7 @@ def _install_codex_hook(root, project=None):
             or (project / '.codex/hooks.json').is_symlink()
             or (project / '.codex/hooks/resume-toolkit').is_symlink()):
         raise ToolkitError('Codex installation aliases are unsupported')
-    if config.exists() or config.is_symlink() or target.exists() or target.is_symlink():
+    if not _payload_only and (config.exists() or config.is_symlink() or target.exists() or target.is_symlink()):
         raise ToolkitError('Codex hook config or bundle already exists; inspect before installing')
     runner = (
         'from pathlib import Path\n'
@@ -207,6 +212,10 @@ def _install_codex_hook(root, project=None):
     hooks = {event: [{'hooks': [{'type': 'command', 'command': command,
               'commandWindows': windows, 'timeout': 3 if event == 'Interrupt' else 120}]}]
              for event in EVENTS}
+    if _payload_only:
+        result = {(target / relative).relative_to(project).as_posix(): raw for relative, raw in payload}
+        result['.codex/hooks.json'] = (json.dumps({'hooks': hooks}, indent=2) + '\n').encode('utf-8')
+        return result
     # Complete all resource reads/path checks before writing any installation.
     destinations = [(confined(project, (target / relative).relative_to(project).as_posix(), required=False), raw)
                     for relative, raw in payload]
@@ -220,7 +229,12 @@ def _install_codex_hook(root, project=None):
     return len(payload) + 1
 
 
-def _install_claude_hook(root, project):
+def claude_hook_payload(root, project):
+    """Plan owned hook groups independently of current owner settings."""
+    return _install_claude_hook(root, project, _payload_only=True)
+
+
+def _install_claude_hook(root, project, *, _payload_only=False):
     """Merge additive local entry hooks, preserving all existing owner settings."""
     from .claude_hooks import EVENTS
 
@@ -230,9 +244,9 @@ def _install_claude_hook(root, project):
             or target != project / '.claude/hooks/resume-toolkit'
             or config.is_symlink() or target.is_symlink()):
         raise ToolkitError('Claude installation aliases are unsupported')
-    if target.exists():
+    if target.exists() and not _payload_only:
         raise ToolkitError('Claude hook bundle already exists; inspect before installing')
-    settings = load_json(config) if config.exists() else {}
+    settings = load_json(config) if config.exists() and not _payload_only else {}
     if not isinstance(settings, dict) or not isinstance(settings.get('hooks', {}), dict):
         raise ToolkitError('invalid existing Claude hook settings')
     hooks = settings.setdefault('hooks', {})
@@ -256,6 +270,10 @@ def _install_claude_hook(root, project):
                'args': ['-I', str(target / 'run.py'), '--workspace', str(root)], 'timeout': 120}
     for event in EVENTS:
         hooks.setdefault(event, []).append({'hooks': [dict(handler)]})
+    if _payload_only:
+        result = {(target / relative).relative_to(project).as_posix(): raw for relative, raw in payload}
+        result['.claude/settings.local.json'] = (json.dumps(settings, indent=2) + '\n').encode('utf-8')
+        return result
     destinations = [(confined(project, (target / relative).relative_to(project).as_posix(), required=False), raw)
                     for relative, raw in payload]
     for path, raw in destinations:

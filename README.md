@@ -54,9 +54,36 @@ a review occurred.
 
 ## Get started
 
-Use Python **3.11 or newer**. Clone this repository using the HTTPS URL in
-GitHub's **Code** menu. Create your private profile inside the repository's
-Git-ignored `user-profile/` directory.
+Use Python **3.11 or newer** and an installed, configured coding agent. Clone this
+repository using the HTTPS URL in GitHub's **Code** menu, open its directory and
+run the installer for your host:
+
+```text
+python install.py codex
+python install.py claude
+python install.py hermes
+```
+
+Choose one command, or run them sequentially for multiple hosts. On macOS/Linux,
+use `python3` if that is your Python 3.11+ executable. Each command creates or reuses
+one project environment under `.local/career-evidence-flow/venv`, installs this
+checkout and its Python dependencies, binds the private `user-profile/` workspace,
+installs the host's skills, and runs diagnostics. Repeat installs refresh unchanged
+managed integrations; custom edits are reported for comparison rather than replaced.
+
+Add `--hooks` to install advisory hook files, for example
+`python install.py codex --hooks`. Previously managed hooks are refreshed on later
+runs. Host trust, plugin activation and model/provider configuration stay explicit.
+Use `--project PATH` for another existing project, `--workspace PRIVATE_CHILD` for
+another contained data directory, or `--without-visual` to omit PDF page-image
+dependencies. The installer does not install the coding agent itself.
+
+Existing installations made with older commands are adopted only when their files
+match the current package. A customized integration, missing managed file or startup
+guide pinned to another environment requires an explicit comparison before upgrade.
+See [installer details and recovery](docs/deployment.md#one-command-host-installers).
+
+For a manually managed Python environment, the original setup remains available:
 
 **Windows / PowerShell**
 

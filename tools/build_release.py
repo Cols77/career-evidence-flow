@@ -25,7 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 # Adding a distributable file requires deliberately extending this allowlist.
 MODULES = """
 __init__ application application_tools artifact_audit ats bootstrap claude_hooks cli codex_hooks deployment
-evidence gallery hook_scope jev_review jev_review_cli letter_check onboarding projection
+evidence gallery hook_scope host_installation jev_review jev_review_cli letter_check onboarding projection
 page_layout questions records render resume_layout workspace
 """.split()
 STYLES = "ats branded letter minimal modern resume-layout".split()
@@ -46,7 +46,7 @@ for _profile in ("developer", "researcher", "showcase"):
 for _skill, _references in SKILLS.items():
     PACKAGE_FILES.add(f"assets/skills/{_skill}/SKILL.md")
     PACKAGE_FILES.update(f"assets/skills/{_skill}/references/{name}.md" for name in _references)
-ROOT_FILES = {"pyproject.toml", "README.md", "MANIFEST.in"}
+ROOT_FILES = {"pyproject.toml", "README.md", "MANIFEST.in", "install.py"}
 EGG_FILES = {"PKG-INFO", "SOURCES.txt", "dependency_links.txt", "entry_points.txt", "requires.txt", "top_level.txt"}
 WHEEL_FILES = {"METADATA", "WHEEL", "RECORD", "entry_points.txt", "top_level.txt"}
 DOCUMENT_FILES = {f"docs/{name}.md" for name in (
