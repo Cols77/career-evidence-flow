@@ -21,7 +21,8 @@ repository ships the tools, agent skills and fictional examples needed to start.
 | **Job screening with practical constraints** | Save search preferences and assess location, remote work, work rights, citizenship, clearance, salary and application documents against available evidence. Unknowns stay explicit. |
 | **Focused interviews before drafting** | Identify the few unanswered questions that could strengthen the application; reuse prior answers and capture new facts in the master profile. |
 | **Tailoring from the full profile** | Select relevant depth and breadth within page limits, preserving chronology, attribution and project maturity. |
-| **Independent review handoffs** | Give actual separate agents the evidence, job description, source text and exact artifacts to review facts, fit, voice, skills and layout. |
+| **Purposeful cover letters** | Build a supported hiring argument, reuse genuine motivation and select the strongest examples instead of repeating the resume. |
+| **Independent review handoffs** | Give actual separate agents the evidence, job description, source text and exact artifacts to review facts, fit, persuasiveness, voice, skills and layout. |
 | **Reproducible application bundles** | Use one CLI to render variants, run checks, freeze selected inputs and detect changed dependencies before review or handoff. |
 
 The agent handles interpretation, interviews and writing. Local Python tools
@@ -174,7 +175,7 @@ evidence, questions, answers, policy and corrections.
 | [job-search](skills/job-search/SKILL.md) | Find and screen jobs; retain preferences, eligibility unknowns and application requirements. |
 | [application-materials](skills/application-materials/SKILL.md) | Orchestrate the job-to-resume-and-letter workflow and its review handoffs. |
 | [resume-review](skills/resume-review/SKILL.md) | Independently review evidence, job alignment, voice, skills, ATS extraction and page layout. |
-| [cover-letter-review](skills/cover-letter-review/SKILL.md) | Independently review facts, motivation, employer relevance, consistency and layout. |
+| [cover-letter-review](skills/cover-letter-review/SKILL.md) | Independently review facts, persuasiveness, motivation, employer relevance, consistency and layout. |
 
 Canonical skills live in `skills/`. Generated copies use `.agents/skills/` for
 Codex and `.claude/skills/` for Claude Code; setup installs `.hermes/skills/` for

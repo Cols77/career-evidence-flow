@@ -1,6 +1,6 @@
 # Cover letter review rubric
 
-High findings: invented candidate facts/motivation, confidential disclosures or contradictions. Medium findings: misleading contribution/scope, unsupported company knowledge, missing requested content, unreadable/clipped output or policy violations. Low findings: optional editorial polish. Ground severity in the actual defect.
+High findings: invented candidate facts/motivation, confidential disclosures or contradictions. Medium findings: misleading contribution/scope, unsupported company knowledge, missing requested content, unreadable/clipped output or policy violations. A materially unclear hiring argument or weak evidence selection is also a content finding when it prevents the letter from demonstrating fit; explain the consequence rather than treating all editorial issues as optional polish. Low findings: optional polish that does not impair the argument. Ground severity in the actual defect, not a demand to find something wrong.
 
 | Angle | Inspect |
 | --- | --- |
@@ -9,6 +9,7 @@ High findings: invented candidate facts/motivation, confidential disclosures or 
 | Motivation authenticity | Is interest grounded in an actual answer? A JD's attractive wording is not the person's motivation. Unknown interest must not become a long-standing passion or admiration. |
 | Company specificity | Are stated company facts actually sourced? Does the letter connect genuine contributions to employer needs? The company-swap test identifies genericness without authorizing invented knowledge. |
 | Role contribution | Does the letter select useful supported examples rather than repeat every resume bullet? Are transferable skills described honestly, with project/course limitations where relevant? |
+| Persuasiveness and selection | Can a reader identify the employer need, the candidate's contribution and the best supporting evidence without the author's rationale? Does each paragraph advance that argument? Explain supported results, learning or decisions without inventing impact. Compare selected examples with stronger relevant evidence; flag task/tool inventories, resume repetition and generic closing claims that obscure fit. A factual pass does not imply a persuasive letter. |
 | Resume consistency | Compare with the current final resume: dates, titles, scope, claims, terms and motivation must not conflict. A changed resume invalidates this verdict. |
 | Voice and concision | Apply the shared [voice and artifact review](../../application-materials/references/voice-and-artifacts.md) against current private writing preferences and authentic samples, where supplied. |
 | Comprehension | Define acronyms when useful and check that the owner can explain claimed knowledge. Ask only actual material questions; never supply their answer yourself. |
@@ -17,6 +18,8 @@ High findings: invented candidate facts/motivation, confidential disclosures or 
 | Freshness | Evidence, answers, JD, policy, letter text, styles, artifacts and final resume are current. Authenticated freshness/release is unavailable; stale notes must be marked manually. |
 
 ## Existing commands
+
+Assess the motivation disposition and selection reasoning after the independent first reading. Reuse recorded answers, respect explicit declines and do not demand a token interview or new metrics when existing evidence is sufficient. Unknown motivation permits an honest neutral letter; it does not excuse an unclear contribution. Return concrete, bounded editorial opportunities, or explain why the existing argument and selection need no useful change. Strong letters do not require artificial criticism or rewriting to the reviewer's stylistic preference.
 
 Use current workspace-relative inputs and a complete standalone effective-policy JSON file:
 

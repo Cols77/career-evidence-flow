@@ -5,6 +5,8 @@ description: Use when a supplied job description needs a tailored resume and cov
 
 # Application materials
 
+For each requested letter, follow the [cover-letter drafting steps](references/drafting-workflow.md#cover-letter): record a brief hiring argument and motivation disposition, select the best supporting examples, and obtain an independent persuasiveness verdict as well as factual and artifact review. These are integrated host workflow steps, not automatic CLI or hook gates.
+
 Use `cv application-context` to inspect standard records and `cv build-application`
 to render/check complete revision bundles. Include actual support/source/answer
 files using repeated `--include`; run `cv verify-bundle` before review and handoff.

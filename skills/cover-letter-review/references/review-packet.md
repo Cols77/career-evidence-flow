@@ -10,6 +10,8 @@ Use explicit local authorized paths. Read actual source and artifacts rather tha
 
 ## Independent assignments
 
+Include the author's brief hiring argument, example-selection reasoning and motivation assessment/disposition with actual source references. First check employer policy, then read the letter and JD before opening that rationale. Record the contribution and supporting examples communicated by the letter alone; afterwards assess the rationale and full evidence. Missing rationale is a workflow gap, not evidence that the letter's claims are false.
+
 An author delegates through real available host subagent tools. Separate contexts and actual tool evidence establish review independence; no invented reviewer IDs or staged “approved” responses. If tools are unavailable, perform a useful self-check and clearly label independence missing. One genuine reviewer may cover multiple angles, but each needs a separate verdict.
 
 Suggested factual/consistency assignment:
@@ -19,6 +21,10 @@ Suggested factual/consistency assignment:
 Suggested motivation/company assignment:
 
 > Independently assess whether motivation comes from actual supplied answers and company facts come from actual checked sources. Connect supported contributions to concrete employer needs. Try changing only the company name to detect generic wording; do not cure genericness with invented admiration, passion or company familiarity. Unknown motivation remains provisional. Verify employer deliverables and AI-use restrictions.
+
+Suggested persuasiveness/selection assignment:
+
+> Read the letter and JD first, after employer-policy checks and before the author's rationale. State the hiring argument the letter communicates. Then compare its selection with the actual evidence and motivation disposition. Does each paragraph advance a concrete contribution to an employer need? Identify useful changes to examples, relevance, interpretation of supported outcomes or redundancy, with affected passages and narrow repairs. If none would help, explain why. Do not invent impact, demand new metrics, repeat answered/declined questions or manufacture criticism. Return a persuasiveness/selection verdict separate from factual correctness.
 
 Suggested voice/comprehension assignment:
 
@@ -37,6 +43,9 @@ Reviewer/run: actual tool-provided identity, or unavailable
 Inspected inputs: actual paths, source/artifact revision observations
 Final resume inspected: actual revision/hash, or missing
 Factual/consistency verdict: no findings | findings | unreviewed
+Persuasiveness/selection verdict: no findings | findings | unreviewed
+Independent first reading: contribution and evidence communicated before rationale
+Editorial opportunities: concrete changes, or reason no useful change is warranted
 Motivation/company verdict: no findings | findings | unreviewed
 Voice/comprehension verdict: no findings | findings | unreviewed
 Visual/artifact verdict: no findings | findings | unreviewed
