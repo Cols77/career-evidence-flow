@@ -10,7 +10,7 @@ from cv_toolkit.bootstrap import init_workspace, install_entry_hook
     ('codex', '.codex/hooks.json'),
     ('claude', '.claude/settings.local.json'),
 ])
-def test_installed_hooks_allow_two_minutes_except_codex_interrupt(tmp_path, host, config):
+def test_installed_hooks_allow_ten_minutes_except_codex_interrupt(tmp_path, host, config):
     project = tmp_path / 'project'
     project.mkdir()
     workspace = init_workspace(project / 'user-profile')
@@ -21,5 +21,5 @@ def test_installed_hooks_allow_two_minutes_except_codex_interrupt(tmp_path, host
         for group in groups:
             for handler in group['hooks']:
                 # Codex imposes a three-second maximum on Interrupt handlers.
-                expected = 3 if host == 'codex' and event == 'Interrupt' else 120
+                expected = 3 if host == 'codex' and event == 'Interrupt' else 600
                 assert handler['timeout'] == expected, (host, event)

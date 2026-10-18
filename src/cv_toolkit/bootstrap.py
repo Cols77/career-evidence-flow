@@ -210,7 +210,7 @@ def _install_codex_hook(root, project=None, *, _payload_only=False):
     windows = '& ' + ' '.join("'" + arg.replace("'", "''") + "'" for arg in argv)
     command = shlex.join(argv)
     hooks = {event: [{'hooks': [{'type': 'command', 'command': command,
-              'commandWindows': windows, 'timeout': 3 if event == 'Interrupt' else 120}]}]
+              'commandWindows': windows, 'timeout': 3 if event == 'Interrupt' else 600}]}]
              for event in EVENTS}
     if _payload_only:
         result = {(target / relative).relative_to(project).as_posix(): raw for relative, raw in payload}
@@ -267,7 +267,7 @@ def _install_claude_hook(root, project, *, _payload_only=False):
         payload.append((f'cv_toolkit/{module}', files('cv_toolkit').joinpath(module).read_bytes()))
     # Claude's documented exec form avoids shell interpretation on all platforms.
     handler = {'type': 'command', 'command': str(Path(sys.executable).resolve()),
-               'args': ['-I', str(target / 'run.py'), '--workspace', str(root)], 'timeout': 120}
+               'args': ['-I', str(target / 'run.py'), '--workspace', str(root)], 'timeout': 600}
     for event in EVENTS:
         hooks.setdefault(event, []).append({'hooks': [dict(handler)]})
     if _payload_only:
