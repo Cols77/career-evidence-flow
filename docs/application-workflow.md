@@ -40,6 +40,8 @@ Use [the schema and command guide](workflow.md) and the skill's supporting refer
 
 ## 5. Review and revise
 
+After drafting each letter and before rendering, run the [fluency pass](../skills/application-materials/references/voice-and-artifacts.md#cover-letter-fluency-pass): read it continuously, connect adjacent ideas, improve transitions and sentence rhythm, and remove wording that interrupts natural reading. Preserve supported meaning and recheck facts after edits. Record useful changes or why none are needed. Independent reviewers explicitly assess those qualities within the existing voice/comprehension verdict; this step is agent judgment, not a new command or automated hook gate.
+
 Use the reusable CLI instead of per-application preparation/rendering scripts:
 `cv application-context --workspace ROOT --application applications/SLUG` validates
 and locates inputs without drafting. After the host writes supported Markdown,

@@ -26,6 +26,16 @@ Independent reviewers assess the final text against these criteria and the priva
 
 In the existing alignment/content verdict, explicitly assess skills selection and granularity separately from factual support. Identify any entries to remove, consolidate or move into experience, with the specific reason; report no findings only after making that judgment. A factual pass does not imply a useful skills section. A focused revision may reuse a recorded review of unchanged content, but must say which content was newly reviewed and which earlier findings it relies on; never present a narrow pass as a new whole-document semantic review.
 
+## Cover-letter fluency pass
+
+After selecting supported content and before rendering, read the whole letter in sequence for transitions, sentence rhythm and natural reading. Assess how it would sound spoken without claiming an audio check unless one actually occurred. A sequence of accurate sentences is not enough: the reader should understand why each sentence and paragraph follows the previous one.
+
+Where the text moves from motivation to qualifications, make the substantive connection visible: how the proposed work lets this candidate contribute to the stated need or purpose. Use the actual role and supported experience; do not invent a personal anecdote, past learning, causal history or achieved impact to supply that bridge. Generic fit labels such as a role being a relevant application of experience can leave the connection unexplained. Adding a transition word alone does not repair a missing idea.
+
+Check adjacent sentence openings and clause patterns, abrupt changes of subject, overloaded sentences, repetitive summaries and abstract language that makes the reader pause. Reorder, combine or split where it helps; preserve technical precision, useful detail and necessary qualifications. Let sentence length and rhythm follow the thought rather than an imposed variation quota. Do not add filler, forced warmth, stock connectors or colloquial wording merely to sound human. A clear passage may need no change.
+
+Record substantive fluency repairs, or a brief reason the existing flow works, in the existing drafting notes. Then recheck the edited claims against the evidence. Independent letter reviewers must assess these same whole-letter and adjacent-passage connections within the existing voice/comprehension verdict, citing the exact transition or rhythm problem and a narrow repair, or explaining why no useful change is needed. Factual and persuasiveness verdicts do not substitute for this fluency assessment. Keep the existing reviewer handoff and two-round limit; no additional reviewer, interview, detector score or automatic hook gate is introduced.
+
 ## Final artifact observations
 
 Run the existing `cv check` on every exact rendered output. Its `artifact_audit` accompanies the ordinary identity, extraction and policy checks for both document kinds. It reports Unicode format-character code points/counts; for readable PDFs, standard metadata field names, counts of other metadata fields and attachments, XMP presence, watermark annotations and page-content non-painting text-mode operators. Metadata values, attachment names and extracted text are omitted from the JSON report.

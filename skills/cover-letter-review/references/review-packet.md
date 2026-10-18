@@ -28,7 +28,7 @@ Suggested persuasiveness/selection assignment:
 
 Suggested voice/comprehension assignment:
 
-> Independently apply the [shared voice criteria](../../application-materials/references/voice-and-artifacts.md) to the actual letter, private writing preferences and any supplied authentic samples. Check acronym comprehension without inventing answers. Return the existing voice/comprehension verdict with exact affected passages.
+> Independently apply the [shared voice criteria](../../application-materials/references/voice-and-artifacts.md) and cover-letter fluency pass to the actual letter, private writing preferences and any supplied authentic samples. Read the whole letter before evaluating isolated sentences. Assess transitions, sentence rhythm and natural reading, especially whether motivation leads coherently into the proposed contribution. Identify exact abrupt, repetitive or overloaded passages and a narrow repair, or explain why no useful change is needed. Do not substitute generic connectors, invented causal history or forced stylistic variation. Check acronym comprehension without inventing answers. Return the existing voice/comprehension verdict with distinct fluency observations; a factual or persuasive pass is not a fluency verdict.
 
 Suggested visual/artifact assignment:
 
@@ -48,6 +48,7 @@ Independent first reading: contribution and evidence communicated before rationa
 Editorial opportunities: concrete changes, or reason no useful change is warranted
 Motivation/company verdict: no findings | findings | unreviewed
 Voice/comprehension verdict: no findings | findings | unreviewed
+Fluency observations: transitions, sentence rhythm and natural reading; exact repairs or reason no change helps
 Visual/artifact verdict: no findings | findings | unreviewed
 Findings: severity; paragraph/subclaim/page; source; narrow repair
 Unknown motivation and other gaps: actual unanswered matters
