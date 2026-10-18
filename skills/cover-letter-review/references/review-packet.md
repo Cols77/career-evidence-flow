@@ -49,6 +49,7 @@ Editorial opportunities: concrete changes, or reason no useful change is warrant
 Motivation/company verdict: no findings | findings | unreviewed
 Voice/comprehension verdict: no findings | findings | unreviewed
 Fluency observations: transitions, sentence rhythm and natural reading; exact repairs or reason no change helps
+Introduction observation: opening context, first sentence/sequence, handoff into evidence and supplied preferences; finding/repair or reason it works
 Visual/artifact verdict: no findings | findings | unreviewed
 Findings: severity; paragraph/subclaim/page; source; narrow repair
 Unknown motivation and other gaps: actual unanswered matters
