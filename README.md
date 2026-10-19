@@ -21,7 +21,7 @@ repository ships the tools, agent skills and fictional examples needed to start.
 | **Job screening with practical constraints** | Save search preferences and assess location, remote work, work rights, citizenship, clearance, salary and application documents against available evidence. Unknowns stay explicit. |
 | **Focused interviews before drafting** | Identify the few unanswered questions that could strengthen the application; reuse prior answers and capture new facts in the master profile. |
 | **Tailoring from the full profile** | Select relevant depth and breadth within page limits, preserving chronology, attribution and project maturity. |
-| **Purposeful cover letters** | Build a supported hiring argument, reuse genuine motivation and select the strongest examples. An explicit fluency pass reviews the introduction, transitions, sentence rhythm and natural reading before independent review. |
+| **Purposeful cover letters** | Build a supported hiring argument, reuse genuine motivation and select the strongest examples. An explicit editorial pass reviews introductions, transitions, rhythm and sentence-level meaning, including distinctions between employers, teams and products. |
 | **Independent review handoffs** | Give actual separate agents the evidence, job description, source text and exact artifacts to review facts, fit, persuasiveness, voice, skills and layout. |
 | **Reproducible application bundles** | Use one CLI to render variants, run checks, freeze selected inputs and detect changed dependencies before review or handoff. |
 

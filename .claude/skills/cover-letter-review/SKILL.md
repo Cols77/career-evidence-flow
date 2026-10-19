@@ -7,6 +7,8 @@ description: Use when a cover letter draft or rendered letter needs independent 
 
 Explicitly assess transitions, sentence rhythm and natural reading using the [cover-letter fluency pass](../application-materials/references/voice-and-artifacts.md#cover-letter-fluency-pass). Read the letter as continuous prose, including the connection between motivation and proposed contribution. Report this within the existing voice/comprehension verdict; factual accuracy or a clear hiring argument alone does not establish fluent writing.
 
+Within that pass, inspect each sentence's literal meaning, including whether verbs, prepositions and pronouns correctly relate companies, teams, products and projects. Record the relationships actually checked, not just a generic fluency pass. A user-reported editorial defect reopens the affected verdict even when the source bytes are unchanged.
+
 Review independently against actual candidate evidence, application answers, employer requirements and the final resume. Read [the review packet](references/review-packet.md) and [the rubric](references/rubric.md).
 
 1. Confirm whether the employer requests a letter and allows the proposed assistance. Obtain the current evidence/registry, actual motivation answers, frozen complete JD, requirement mappings, effective policy, final resume, letter source and exact rendered artifacts. Do not review a prohibited or unrequested letter as a required deliverable.

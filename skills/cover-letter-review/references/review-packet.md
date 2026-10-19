@@ -30,6 +30,8 @@ Suggested voice/comprehension assignment:
 
 > Independently apply the [shared voice criteria](../../application-materials/references/voice-and-artifacts.md) and cover-letter fluency pass to the actual letter, private writing preferences and any supplied authentic samples. Read the whole letter before evaluating isolated sentences. Assess transitions, sentence rhythm and natural reading, especially whether motivation leads coherently into the proposed contribution. Identify exact abrupt, repetitive or overloaded passages and a narrow repair, or explain why no useful change is needed. Do not substitute generic connectors, invented causal history or forced stylistic variation. Check acronym comprehension without inventing answers. Return the existing voice/comprehension verdict with distinct fluency observations; a factual or persuasive pass is not a fluency verdict.
 
+> Then check sentence-level meaning: use the JD/checked sources to distinguish each named company, team, product and project, and inspect the verbs, prepositions and pronouns around those names. Identify misleading wording and repair it narrowly without inventing relationships or banning ordinary phrases. Record which relationships and wording you checked, or that none occur. A user-reported wording defect must be reviewed afresh; unchanged bytes and an earlier no-findings verdict do not resolve it.
+
 Suggested visual/artifact assignment:
 
 > Inspect the full exact rendered letter with actual visual tools, including every PDF page. Check clipping, font size, spacing, hierarchy, word/page limits, extraction order and source/artifact correspondence. Compare with current effective policy and actual `cv check` results. State uninspected artifacts/pages and tool limitations; source-only reading is not visual review.
@@ -50,6 +52,7 @@ Motivation/company verdict: no findings | findings | unreviewed
 Voice/comprehension verdict: no findings | findings | unreviewed
 Fluency observations: transitions, sentence rhythm and natural reading; exact repairs or reason no change helps
 Introduction observation: opening context, first sentence/sequence, handoff into evidence and supplied preferences; finding/repair or reason it works
+Sentence-level meaning observation: named-entity relationships and wording checked (or absent); exact repair or reason appropriate
 Visual/artifact verdict: no findings | findings | unreviewed
 Findings: severity; paragraph/subclaim/page; source; narrow repair
 Unknown motivation and other gaps: actual unanswered matters
