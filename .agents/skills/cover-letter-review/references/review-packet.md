@@ -32,6 +32,8 @@ Suggested voice/comprehension assignment:
 
 > Then check sentence-level meaning: use the JD/checked sources to distinguish each named company, team, product and project, and inspect the verbs, prepositions and pronouns around those names. Identify misleading wording and repair it narrowly without inventing relationships or banning ordinary phrases. Record which relationships and wording you checked, or that none occur. A user-reported wording defect must be reviewed afresh; unchanged bytes and an earlier no-findings verdict do not resolve it.
 
+> Explicitly assess the final body paragraph through the closing and sign-off. Record whether the transition and final invitation or other appropriate ending feel natural and complete; cite an abrupt passage and narrow repair, or explain why it works. Do not introduce unsupported availability or insist on a fixed closing phrase, thank-you or length. Confirm the rendered ending and signature still fit cleanly after any repair.
+
 Suggested visual/artifact assignment:
 
 > Inspect the full exact rendered letter with actual visual tools, including every PDF page. Check clipping, font size, spacing, hierarchy, word/page limits, extraction order and source/artifact correspondence. Compare with current effective policy and actual `cv check` results. State uninspected artifacts/pages and tool limitations; source-only reading is not visual review.
@@ -53,6 +55,7 @@ Voice/comprehension verdict: no findings | findings | unreviewed
 Fluency observations: transitions, sentence rhythm and natural reading; exact repairs or reason no change helps
 Introduction observation: opening context, first sentence/sequence, handoff into evidence and supplied preferences; finding/repair or reason it works
 Sentence-level meaning observation: named-entity relationships and wording checked (or absent); exact repair or reason appropriate
+Closing observation: final body-to-conclusion transition, invitation or other ending, tone and sign-off; exact repair or reason complete
 Visual/artifact verdict: no findings | findings | unreviewed
 Findings: severity; paragraph/subclaim/page; source; narrow repair
 Unknown motivation and other gaps: actual unanswered matters

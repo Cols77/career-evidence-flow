@@ -9,6 +9,8 @@ Explicitly assess transitions, sentence rhythm and natural reading using the [co
 
 Within that pass, inspect each sentence's literal meaning, including whether verbs, prepositions and pronouns correctly relate companies, teams, products and projects. Record the relationships actually checked, not just a generic fluency pass. A user-reported editorial defect reopens the affected verdict even when the source bytes are unchanged.
 
+Explicitly review the last body paragraph, conclusion and sign-off as a sequence. Record why the ending follows naturally and feels complete, or give a narrow repair for an abrupt or presumptive closing. Check the rendered closing/signature after revision; do not enforce a fixed closing formula or invent availability and other facts.
+
 Review independently against actual candidate evidence, application answers, employer requirements and the final resume. Read [the review packet](references/review-packet.md) and [the rubric](references/rubric.md).
 
 1. Confirm whether the employer requests a letter and allows the proposed assistance. Obtain the current evidence/registry, actual motivation answers, frozen complete JD, requirement mappings, effective policy, final resume, letter source and exact rendered artifacts. Do not review a prohibited or unrequested letter as a required deliverable.

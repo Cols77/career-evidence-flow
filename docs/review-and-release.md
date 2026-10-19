@@ -57,3 +57,28 @@ passage 1. Keep the passage bytes unchanged. Ask which findings can be reused.
   invent corporate ownership.
 - Reopen the affected editorial verdict after the user objection even without
   a byte change. Clearly scope any reuse of unaffected factual or visual findings.
+
+### Closing scenarios
+
+The fictional applicant built an experimental sensor testbench and lives in
+Harbourtown. Availability, work rights and relocation are not established. The
+last body sentence is: "That testbench experience would help me investigate
+integration failures with your firmware team."
+
+Compare these endings in that context before reading the expectations:
+
+1. "I live in Harbourtown. Kind regards, Alex."
+2. "I would welcome a conversation about how that experience could support your
+   firmware team. Thank you for considering my application. Kind regards, Alex."
+3. "I can start immediately and relocate next week. Please schedule my interview.
+   Kind regards, Alex."
+4. "I would welcome the opportunity to discuss the integration challenges your
+   team is tackling. Best regards, Alex."
+
+Expected observations: flag 1's abrupt shift to location and missing conversational
+close; propose a supported bridge without inventing facts. Accept 2's connection,
+invitation and courteous completion. Flag 3's unsupported availability/relocation
+and presumptive demand. Accept 4 as a concise natural ending without requiring
+thanks or a longer formula. Identify the actual transition and sign-off in the
+review; a generic assertion that the letter flows is insufficient. These are
+bounded semantic probes, not an automated fluency score.
