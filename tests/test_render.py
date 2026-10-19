@@ -178,6 +178,37 @@ def test_missing_browser_is_explicit(tmp_path, monkeypatch):
         module.render_pdf(source, tmp_path / 'output.pdf')
 
 
+@pytest.mark.parametrize('simulated_seconds', [120, 601])
+def test_slow_browser_gets_bounded_time_and_timeout_preserves_output(
+        tmp_path, monkeypatch, simulated_seconds):
+    module = renderer()
+    source = tmp_path / 'source.md'
+    source.write_text('# Example')
+    browser = tmp_path / 'chrome.exe'
+    browser.touch()
+    output = tmp_path / 'result.pdf'
+    output.write_bytes(b'existing output')
+
+    def run(command, **kwargs):
+        # Model a loaded machine without sleeping in the test suite.
+        assert 0 < kwargs['timeout'] <= 600
+        if simulated_seconds > kwargs['timeout']:
+            raise subprocess.TimeoutExpired(command, kwargs['timeout'],
+                                            stderr='private browser diagnostic')
+        target = next(x.split('=', 1)[1] for x in command if x.startswith('--print-to-pdf='))
+        fake_pdf(target)
+        return subprocess.CompletedProcess(command, 0, '', '')
+
+    monkeypatch.setattr(module.subprocess, 'run', run)
+    if simulated_seconds <= 600:
+        module.render_pdf(source, output, chrome_path=browser)
+        assert output.read_bytes().startswith(b'%PDF-')
+    else:
+        with pytest.raises(RuntimeError, match='^Chromium PDF rendering failed$'):
+            module.render_pdf(source, output, chrome_path=browser)
+        assert output.read_bytes() == b'existing output'
+
+
 def test_malformed_pdf_with_magic_header_has_a_sanitized_render_error(tmp_path, monkeypatch):
     module = renderer()
     source = tmp_path / 'source.md'

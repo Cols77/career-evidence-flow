@@ -1,5 +1,10 @@
 # Reproducible resume visuals
 
+PDF rendering allows up to 600 seconds per Chromium invocation to accommodate
+heavily loaded machines. This is a finite process timeout, not a rendering delay;
+successful renders return as soon as the browser exits. A failed or timed-out
+render does not replace an existing PDF.
+
 The toolkit packages its renderer, shared layout, themes and fictional demonstration together. No private candidate repository, Google Drive folder or external font service is needed. Keep real resumes in a separate private workspace.
 
 ## Compare the designs

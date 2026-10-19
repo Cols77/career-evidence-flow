@@ -20,6 +20,7 @@ from pypdf.errors import PdfReadError
 RESUME_STYLES = ('ats', 'branded', 'modern', 'minimal')
 STYLES = (*RESUME_STYLES, 'letter')
 DOCUMENT_KINDS = ('resume', 'cover_letter')
+PDF_RENDER_TIMEOUT_SECONDS = 600
 _RAW_HTML = re.compile(r'<!--|<!|</?[A-Za-z][\w:-]*(?=[\s/>])')
 _TAGS = {'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'ul', 'ol', 'li', 'strong', 'em',
          'blockquote', 'pre', 'code', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'a', 'br', 'hr'}
@@ -130,7 +131,8 @@ def render_pdf(markdown_path: Path, output_path: Path, style: str = 'ats',
                    '--host-resolver-rules=MAP * ~NOTFOUND', f'--user-data-dir={staging / "profile"}',
                    f'--print-to-pdf={pdf_path}', html_path.as_uri()]
         try:
-            result = subprocess.run(command, capture_output=True, text=True, timeout=60, check=False)
+            result = subprocess.run(command, capture_output=True, text=True,
+                                    timeout=PDF_RENDER_TIMEOUT_SECONDS, check=False)
             if result.returncode != 0 or not pdf_path.is_file() or pdf_path.stat().st_size == 0:
                 raise RuntimeError('invalid browser output')
             if not pdf_path.read_bytes().startswith(b'%PDF-') or not PdfReader(pdf_path).pages:
