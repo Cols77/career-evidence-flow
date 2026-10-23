@@ -1,0 +1,9 @@
+{
+  "name": "resume-toolkit",
+  "version": "0.2.0",
+  "description": "Career Evidence Flow: capture your experience as sourced evidence, screen jobs, and draft and independently review tailored resumes and cover letters.",
+  "author": {
+    "name": "Colin AUBE"
+  },
+  "keywords": ["resume", "cover-letter", "job-search", "evidence", "review"]
+}

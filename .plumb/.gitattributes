@@ -1,0 +1,6 @@
+log/*.jsonl merge=union
+intents/*.md merge=plumb-record
+requirements/*.md merge=plumb-record
+decisions/*.md merge=plumb-record
+features/*.md merge=plumb-record
+ncs/*.md merge=plumb-record

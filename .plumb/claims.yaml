@@ -1,0 +1,7 @@
+# SR: trailer policy (plumb trailers check-msg, plumb claims check).
+require_trailer: false
+# Extra exempt globs (the defaults .plumb/**, docs/**, .claude/**, uv.lock, .gitignore and
+# .gitattributes always apply).
+exempt: []
+# NC-backed baseline of undeclared paths; it may only shrink: [{commit, path, nc}]
+baseline: []

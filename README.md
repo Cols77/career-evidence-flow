@@ -183,6 +183,11 @@ Hermes. [AGENTS.md](AGENTS.md) and [CLAUDE.md](CLAUDE.md) are the repository
 entrypoints. After updates, compare installed skills and hook copies with the
 current package: updating repository source alone does not refresh copied hooks.
 
+The checkout is also a Claude Code plugin named `resume-toolkit`, serving the same
+five skills straight from `skills/`. Load it in another project with
+`claude --plugin-dir PATH/TO/CHECKOUT`. The plugin ships skills only: install the
+advisory hooks per project with `cv install-agent --hooks`.
+
 ## Your profile stays separate from the public project
 
 ```text
