@@ -5,5 +5,12 @@
   "author": {
     "name": "Colin AUBE"
   },
-  "keywords": ["resume", "cover-letter", "job-search", "evidence", "review"]
+  "keywords": [
+    "resume",
+    "cover-letter",
+    "job-search",
+    "evidence",
+    "review"
+  ],
+  "license": "MIT"
 }
