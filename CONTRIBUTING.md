@@ -6,4 +6,4 @@ Install `.[test]` in a virtual environment and run `python -m pytest -q`. For sk
 
 Build a wheel and exercise its installed skills from outside the checkout when distribution changes. `tools/verify_installed.py` validates both synthetic profiles, host file installation and local document previews; PDF checks require Chrome/Chromium. This does not demonstrate native host discovery or guarded release.
 
-Before sharing, follow [privacy checks](docs/privacy.md), using an external private denylist and a reviewed file allowlist. Do not commit private profiles, host state, credentials, local verification notes or generated candidate outputs. The project currently has no open-source license.
+Before sharing, follow [privacy checks](docs/privacy.md), using an external private denylist and a reviewed file allowlist. Do not commit private profiles, host state, credentials, local verification notes or generated candidate outputs. The project is released under the [MIT license](LICENSE).

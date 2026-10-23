@@ -16,3 +16,16 @@ def test_neutral_distribution_preserves_console_entrypoint():
     assert project["readme"] == "README.md"
     assert "urls" not in project
     assert "build>=1.2" in project["optional-dependencies"]["dev"]
+
+
+def test_repository_is_a_claude_plugin_exposing_the_five_skills():
+    root = Path(__file__).resolve().parents[1]
+    import json
+    plugin = json.loads((root / ".claude-plugin" / "plugin.json").read_text(encoding="utf-8"))
+    assert plugin["name"] == "resume-toolkit" and plugin["version"] == __version__
+    skills = sorted(p.parent.name for p in (root / "skills").glob("*/SKILL.md"))
+    assert skills == ["application-materials", "cover-letter-review", "experience-capture",
+                      "job-search", "resume-review"]
+    for name in skills:
+        head = (root / "skills" / name / "SKILL.md").read_text(encoding="utf-8").split("---")[1]
+        assert f"name: {name}" in head and "description:" in head

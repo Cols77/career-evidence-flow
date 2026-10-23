@@ -63,7 +63,7 @@ def _parser():
     gallery.add_argument('--output', type=Path, required=True, help='New directory for the comparison')
     gallery.add_argument('--format', choices=('html', 'both'), default='html',
                          help='HTML comparison, optionally with PDF previews (requires Chromium)')
-    for command in ('onboard', 'validate-evidence', 'validate-projection', 'render', 'check', 'install-skills', 'install-hooks', 'install-agent', 'create-application', 'status', 'answer', 'resolve-question', 'workflow-checkpoint', 'workflow-status', 'application-context', 'build-application', 'verify-bundle'):
+    for command in ('onboard', 'validate-evidence', 'validate-projection', 'render', 'check', 'install-skills', 'install-hooks', 'install-agent', 'create-application', 'status', 'answer', 'resolve-question', 'workflow-checkpoint', 'workflow-status', 'application-context', 'build-application', 'verify-bundle', 'record-review', 'review-status'):
         item = sub.add_parser(command)
         item.add_argument('--workspace', type=Path, required=True)
         if command in ('application-context', 'build-application'):
@@ -75,8 +75,14 @@ def _parser():
             item.add_argument('--style', choices=RESUME_STYLES, action='append', help='Repeat for resume variants; default: ats and branded')
             item.add_argument('--include', action='append', default=[], help='Extra workspace-relative source, prior answer or support note to snapshot')
             item.add_argument('--page-images', action='store_true', help='Rasterize every PDF page (requires visual extra)')
-        if command == 'verify-bundle':
+        if command in ('verify-bundle', 'record-review', 'review-status'):
             item.add_argument('--bundle', required=True, help='Workspace-relative bundle.json')
+        if command == 'record-review':
+            item.add_argument('--document', choices=('resume', 'cover_letter'), required=True)
+            item.add_argument('--angle', required=True, help='resume: factual, alignment, voice, visual; cover_letter: factual, persuasiveness, motivation, voice, visual')
+            item.add_argument('--verdict', choices=('pass', 'findings', 'unavailable'), required=True)
+            item.add_argument('--findings', help='Workspace-relative findings file under outputs (required for findings)')
+            item.add_argument('--reviewer', help='Reviewer agent or run reference, as declared by the host')
         if command in ('workflow-checkpoint', 'workflow-status'):
             item.add_argument('--session-id', required=True)
         if command == 'workflow-checkpoint':
@@ -163,7 +169,12 @@ def main(argv=None):
                 result.update(checkpoint_status(args.workspace, args.session_id))
         else:
             ws = Workspace.load(args.workspace)
-            if args.command in ('application-context', 'build-application', 'verify-bundle'):
+            if args.command in ('record-review', 'review-status'):
+                from .application_tools import record_review, review_status
+                result.update(review_status(ws, args.bundle) if args.command == 'review-status' else
+                              record_review(ws, args.bundle, args.document, args.angle, args.verdict,
+                                            args.findings, args.reviewer))
+            elif args.command in ('application-context', 'build-application', 'verify-bundle'):
                 from .application_tools import application_context, build_application, verify_bundle
                 if args.command == 'application-context':
                     result.update(application_context(ws, args.application))

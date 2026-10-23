@@ -1,0 +1,38 @@
+# plumb configuration. Every key is optional; the defaults are shown commented out.
+# A list given here replaces the default list.
+# source_dirs: [src, tests]      # unset: also any code file outside tests, docs and dot dirs
+# test_dirs: [tests]
+# verify:
+#   turn_budget_s: 60
+#   hard_limit_factor: 1.5
+#   fill_fraction: 0.65        # estimates (scaled by observed pace) fill 65 % of the budget
+#   sample_size: 10
+#   default_test_s: 1.0
+#   workers: 0                 # 0 = no -n; at most 2
+#   flaky_rerun: true
+#   infra_globs: ["**/conftest.py", pyproject.toml, uv.lock, pytest.ini, tox.ini, setup.cfg]
+# hooks:
+#   hard_limit_s: 90           # the watchdog cuts a hook here; at most 119 (host timeouts 120 s)
+#   budget_ms: {session_start: 60000, prompt: 60000, stop: 60000, post_edit: 15000}
+#   brief_lines: 30
+#   prompt_lines: 20
+#   prompt_tokens: 200         # per-prompt injection budget; records once per session
+#   session_brief: compact     # compact (a few lines) | full (the long brief)
+#   summary_proposed_cap: 3    # records shown in full per summary
+# approve:
+#   affirmations: [ok, okay, yes, approve, approved, confirm, confirmed, agreed, lgtm,
+#                  go ahead, sounds good]
+# judgment:
+#   backend: jev               # jev | disabled; none set: judging raises an error
+#   hook_timeout_ms: 800
+# escalation: {max_requirements: 3, max_features: 1, diff_lines: 400, diff_files: 10}
+# trace:
+#   exempt: []                 # source globs that need no requirement (untraced changes);
+#                              # a glob added on a branch is not honoured at the merge;
+#                              # nothing approves one yet (SR-288)
+judgment:
+  backend: jev
+  jev:
+    provider: openrouter
+    model: typesafe/jev-1.13
+    credential_env: OPENROUTER_API_KEY

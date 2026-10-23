@@ -1,4 +1,5 @@
 """Reusable application previews and selected-file freshness, never approval."""
+from datetime import datetime, timezone
 from hashlib import sha256
 from importlib.resources import files
 import os
@@ -11,7 +12,7 @@ from .application import load_application
 from .deployment import _git, _ignore_check
 from .evidence import build_source_registry, load_evidence
 from .questions import load_questions, pending_questions
-from .records import ToolkitError, atomic_write_json, confined, load_json, object_fields, schema
+from .records import ToolkitError, atomic_write_json, confined, load_json, nonempty, object_fields, schema
 from .workspace import Workspace
 
 
@@ -266,3 +267,79 @@ def verify_bundle(workspace, bundle):
             'changed': changed, 'missing': missing, 'source_coverage': 'host_selected_not_authenticated',
             'checks_status': record['checks_status'], 'review_status': 'unreviewed_preview',
             'release_available': False}
+
+
+ANGLES = {'resume': ('factual', 'alignment', 'voice', 'visual'),
+          'cover_letter': ('factual', 'persuasiveness', 'motivation', 'voice', 'visual')}
+VERDICTS = ('pass', 'findings', 'unavailable')
+
+
+def _reviewed_bundle(workspace, bundle):
+    verify_bundle(workspace, bundle)  # structural validation; staleness is reported per angle
+    path = confined(workspace.root, bundle)
+    return path, load_json(path)
+
+
+def _document_hashes(path, record, kind):
+    prefix = 'resume-' if kind == 'resume' else 'cover-letter'
+    return {name: _digest((path.parent / name).read_bytes()) if (path.parent / name).is_file() else None
+            for name in record['documents'] if name.startswith(prefix)}
+
+
+def _reviews(path):
+    ledger = path.parent / 'reviews.json'
+    if not ledger.exists():
+        return []
+    record = load_json(ledger)
+    object_fields(record, {'schema_version', 'reviews'}, rule='review ledger')
+    schema(record['schema_version'])
+    if not isinstance(record['reviews'], list):
+        raise ToolkitError('invalid review ledger')
+    for entry in record['reviews']:
+        object_fields(entry, {'document', 'angle', 'verdict', 'bundle_sha256', 'artifacts', 'recorded_at'},
+                      {'findings', 'reviewer'}, rule='review entry')
+    return record['reviews']
+
+
+def record_review(workspace, bundle, document, angle, verdict, findings=None, reviewer=None):
+    """Append one declared verdict; it authenticates no reviewer and approves nothing."""
+    path, record = _reviewed_bundle(workspace, bundle)
+    if document not in record['context']['policy']['deliverables'] or angle not in ANGLES[document] \
+            or verdict not in VERDICTS:
+        raise ToolkitError('invalid review angle or verdict')
+    if (verdict == 'findings') != (findings is not None):
+        raise ToolkitError('a findings verdict needs a findings file, and only it')
+    entry = {'document': document, 'angle': angle, 'verdict': verdict,
+             'bundle_sha256': _digest(path.read_bytes()),
+             'artifacts': _document_hashes(path, record, document),
+             'recorded_at': datetime.now(timezone.utc).isoformat()}
+    if findings is not None:
+        report = confined(workspace.root, findings)
+        report.relative_to(workspace.outputs_dir)
+        if not report.is_file():
+            raise ToolkitError('findings file missing')
+        entry['findings'] = _relative(workspace, report)
+    if reviewer is not None:
+        entry['reviewer'] = nonempty(reviewer, 'reviewer').strip()
+    atomic_write_json(path.parent / 'reviews.json',
+                      {'schema_version': 1, 'reviews': [*_reviews(path), entry]})
+    return review_status(workspace, bundle)
+
+
+def review_status(workspace, bundle):
+    """Which required review angles have a current declared verdict; never an approval."""
+    path, record = _reviewed_bundle(workspace, bundle)
+    latest = {(e['document'], e['angle']): e for e in _reviews(path)}
+    angles = {}
+    for document in record['context']['policy']['deliverables']:
+        current = _document_hashes(path, record, document)
+        for angle in ANGLES[document]:
+            entry = latest.get((document, angle))
+            state = ('missing' if entry is None else 'stale' if entry['artifacts'] != current
+                     else 'unavailable' if entry['verdict'] == 'unavailable' else 'recorded')
+            angles[document + '.' + angle] = {'state': state, 'verdict': entry and entry['verdict']}
+    by_state = {s: [a for a, v in angles.items() if v['state'] == s]
+                for s in ('missing', 'stale', 'unavailable')}
+    return {'angles': angles, **by_state,
+            'coverage': 'complete' if all(v['state'] == 'recorded' for v in angles.values()) else 'incomplete',
+            'review_status': 'unreviewed_preview', 'release_available': False}

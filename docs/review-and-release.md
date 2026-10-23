@@ -14,6 +14,19 @@ After any change to evidence, answers, projections, job interpretation, policy, 
 
 Current rendering produces `unreviewed_preview`; application status is always `draft_only` with `release_available: false`. There is no release/check/copy command. Remaining implementation includes exhaustive typed claim maps, authenticated reviewer runs, complete dependency fingerprints and immutable reviewed-byte release. Manual notes, synthetic acceptance scenarios and successful unit tests cannot authorize production release.
 
+## Review coverage by host
+
+Each required angle needs its own verdict: resume factual, alignment, voice and visual;
+cover letter factual, persuasiveness, motivation, voice and visual. `cv record-review` stores
+one declared verdict per angle beside the bundle, with the hashes of the reviewed artifacts.
+`cv review-status` lists each angle as recorded, missing, stale or unavailable. A verdict
+is a declaration: it does not authenticate the reviewer or approve anything.
+
+On Claude Code the saved `review-angles` workflow (`.claude/workflows/review-angles.js`)
+dispatches one fresh reviewer per missing or stale angle and records each verdict. Codex and
+Hermes have no equivalent here: they rely on the skill instruction to dispatch one reviewer
+per angle, and `cv review-status` is how a missed angle becomes visible there.
+
 ## Cover-letter editorial regression scenarios
 
 These fictional cases exercise the host's sentence-level review. They are not

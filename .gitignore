@@ -22,3 +22,4 @@ private/
 *.png
 *.jpg
 *.zip
+!/.claude-plugin/icon.png
