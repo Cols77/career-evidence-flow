@@ -188,7 +188,8 @@ five skills straight from `skills/`. Load it in another project with
 `claude --plugin-dir PATH/TO/CHECKOUT`, or install it from this repository's marketplace:
 
 ```text
-/plugin install resume-toolkit --marketplace Cols77/career-evidence-flow
+/plugin marketplace add Cols77/career-evidence-flow
+/plugin install resume-toolkit@career-evidence-flow
 ```
 
 The plugin ships skills only: install the
