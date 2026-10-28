@@ -23,7 +23,10 @@ one declared verdict per angle beside the bundle, with the hashes of the reviewe
 is a declaration: it does not authenticate the reviewer or approve anything.
 
 On Claude Code the saved `review-angles` workflow (`.claude/workflows/review-angles.js`)
-dispatches one fresh reviewer per missing or stale angle and records each verdict. Codex and
+dispatches one fresh reviewer per missing or stale angle and records each verdict. Reviewers run on
+Sonnet by default (pass `model` in the workflow args to change it); the two status steps run on Haiku.
+The resume `readability` reviewer reads only the rendered resume and the frozen job text, never the
+evidence, so it reads the page the way a recruiter does. Codex and
 Hermes have no equivalent here: they rely on the skill instruction to dispatch one reviewer
 per angle, and `cv review-status` is how a missed angle becomes visible there.
 

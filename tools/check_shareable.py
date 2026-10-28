@@ -13,7 +13,7 @@ import re
 import subprocess
 
 
-TEXT_SUFFIXES = {'.py', '.md', '.json', '.toml', '.css', '.html', '.txt', '.yml', '.yaml'}
+TEXT_SUFFIXES = {'.js', '.py', '.md', '.json', '.toml', '.css', '.html', '.txt', '.yml', '.yaml'}
 TEXT_NAMES = {'.gitignore', '.gitattributes', 'LICENSE', 'NOTICE', 'MANIFEST.in'}
 CREDENTIALS = re.compile(r'gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{40,}|AKIA[A-Z0-9]{16}|-----BEGIN (?:[A-Z]+ )?PRIVATE KEY-----')
 

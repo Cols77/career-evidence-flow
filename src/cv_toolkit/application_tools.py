@@ -269,7 +269,7 @@ def verify_bundle(workspace, bundle):
             'release_available': False}
 
 
-ANGLES = {'resume': ('factual', 'alignment', 'voice', 'visual'),
+ANGLES = {'resume': ('factual', 'alignment', 'voice', 'readability', 'visual'),
           'cover_letter': ('factual', 'persuasiveness', 'motivation', 'voice', 'visual')}
 VERDICTS = ('pass', 'findings', 'unavailable')
 

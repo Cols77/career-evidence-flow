@@ -79,7 +79,7 @@ def _parser():
             item.add_argument('--bundle', required=True, help='Workspace-relative bundle.json')
         if command == 'record-review':
             item.add_argument('--document', choices=('resume', 'cover_letter'), required=True)
-            item.add_argument('--angle', required=True, help='resume: factual, alignment, voice, visual; cover_letter: factual, persuasiveness, motivation, voice, visual')
+            item.add_argument('--angle', required=True, help='resume: factual, alignment, voice, readability, visual; cover_letter: factual, persuasiveness, motivation, voice, visual')
             item.add_argument('--verdict', choices=('pass', 'findings', 'unavailable'), required=True)
             item.add_argument('--findings', help='Workspace-relative findings file under outputs (required for findings)')
             item.add_argument('--reviewer', help='Reviewer agent or run reference, as declared by the host')

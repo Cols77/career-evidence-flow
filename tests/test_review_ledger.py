@@ -43,7 +43,7 @@ def test_letter_angle_is_refused_for_the_resume(application, capsys):
 def test_status_lists_recorded_and_missing_angles(application, capsys):
     root, _ = application
     assert build(capsys, root)[0] == 0
-    for angle in ('factual', 'alignment', 'voice', 'visual'):
+    for angle in ('factual', 'alignment', 'voice', 'readability', 'visual'):
         assert record(capsys, root, '--document', 'resume', '--angle', angle, '--verdict', 'pass')[0] == 0
     code, status = invoke(capsys, root, 'review-status', '--bundle', BUNDLE)
     assert code == 0 and status['coverage'] == 'incomplete'
@@ -70,4 +70,5 @@ def test_resume_only_policy_requires_no_letter_angle(application, capsys):
     record_path.write_text(json.dumps(data), encoding='utf-8')
     assert build(capsys, root)[0] == 0
     status = invoke(capsys, root, 'review-status', '--bundle', BUNDLE)[1]
-    assert set(status['angles']) == {'resume.factual', 'resume.alignment', 'resume.voice', 'resume.visual'}
+    assert set(status['angles']) == {'resume.factual', 'resume.alignment', 'resume.voice', 'resume.readability',
+                                     'resume.visual'}
