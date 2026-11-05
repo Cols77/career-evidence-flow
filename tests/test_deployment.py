@@ -248,3 +248,18 @@ def test_doctor_warns_when_hermes_skills_are_below_git_project_root(tmp_path, ca
     assert 'root' in check['message']
     assert result['runtime_discovery_verified'] is False
     assert snapshot(root) == before
+
+
+def test_startup_guide_keeps_a_symlinked_environment_interpreter(tmp_path, monkeypatch):
+    import sys
+    from cv_toolkit import deployment
+    link = tmp_path / 'venv' / 'python'
+    link.parent.mkdir()
+    try:
+        link.symlink_to(sys.executable)
+    except OSError:
+        pytest.skip('symlinks are unavailable here')
+    monkeypatch.setattr(sys, 'executable', str(link))
+    guide = deployment._guide(tmp_path / 'user-profile', tmp_path, 'claude')
+    commands = [line for line in guide.splitlines() if 'cv_toolkit.cli' in line]
+    assert len(commands) == 2 and all(str(link) in line for line in commands)
