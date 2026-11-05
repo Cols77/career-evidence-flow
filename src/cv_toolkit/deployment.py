@@ -164,7 +164,8 @@ def _workspace(root):
 
 def _guide(root, project, host):
     def command(*args):
-        argv = [str(Path(sys.executable).resolve()), '-m', 'cv_toolkit.cli', *args]
+        # abspath, not resolve(): a Linux venv's python is a symlink to the system interpreter, which lacks the toolkit.
+        argv = [os.path.abspath(sys.executable), '-m', 'cv_toolkit.cli', *args]
         if os.name == 'nt':
             return '& ' + ' '.join("'" + arg.replace("'", "''") + "'" for arg in argv)
         return shlex.join(argv)
@@ -340,7 +341,7 @@ def doctor(root, *, host='all', project_root=None):
     result = {'workspace': str(root), 'project_root': str(project), 'checks': checks, 'runtime_discovery_verified': False,
               'hook_execution_verified': False, 'independent_review_verified': False}
     checks.append({'id': 'package', 'status': 'pass', 'path': str(Path(__file__).resolve().parent),
-                   'interpreter': str(Path(sys.executable).resolve()),
+                   'interpreter': os.path.abspath(sys.executable),
                    'message': 'Actual imported package and interpreter; other PATH executables may use a different installation.'})
     workspace = None
     try:
