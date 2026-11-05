@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Read and follow [AGENTS.md](AGENTS.md); it holds the workflow and privacy rules and wins over this file. Application work starts with `/application-materials`; experience capture uses `/experience-capture`; opportunity screening uses `/job-search`. Run separate reviewers with `/resume-review` and `/cover-letter-review` when delegation is available.
 
-The public name is Career Evidence Flow; the distribution is `resume-toolkit`, the package is `cv_toolkit`, the command is `cv`. The pinned interpreter is per machine and recorded in the Git-ignored `RESUME_TOOLKIT.md`: `.venv/Scripts/python.exe` on Windows, `.venv/bin/python` (or another local environment) on Linux and macOS. CI runs the suite on Linux and Windows; the real data workspace is the Git-ignored `user-profile/`.
+The public name is Career Evidence Flow; the distribution is `resume-toolkit`, the package is `cv_toolkit`, the command is `cv`. The pinned interpreter is per machine and recorded in the Git-ignored `RESUME_TOOLKIT.md`: `.venv/Scripts/python.exe` on Windows, `.venv/bin/python` (or another local environment) on Linux and macOS; the real data workspace is the Git-ignored `user-profile/`.
 
 ## Commands
 
