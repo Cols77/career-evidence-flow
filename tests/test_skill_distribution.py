@@ -62,3 +62,8 @@ def test_repository_and_wheel_skill_copies_are_current():
             folder = root / prefix / name
             actual = {p.relative_to(folder).as_posix(): p.read_bytes() for p in folder.rglob('*') if p.is_file()}
             assert actual == expected, f'run tools/sync_skills.py for {prefix}/{name}'
+
+
+def test_experience_capture_requires_the_master_profile_update():
+    text = (Path(__file__).resolve().parents[1] / 'skills/experience-capture/SKILL.md').read_text(encoding='utf-8')
+    assert '[paths] master' in text and 'master_missing' in text

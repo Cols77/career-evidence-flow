@@ -7,7 +7,7 @@ import tempfile
 
 from .bootstrap import EXAMPLES, WorkspaceBindingError, init_workspace, install_skills, install_entry_hook
 from .deployment import DeploymentError
-from .evidence import build_source_registry, claim_index, load_evidence
+from .evidence import build_source_registry, claim_index, load_evidence, master_missing
 from .records import ToolkitError, confined, load_json
 from .workspace import Workspace
 
@@ -187,6 +187,8 @@ def main(argv=None):
             elif args.command == 'validate-evidence':
                 record, registry = _profile(ws, args.evidence, args.registry)
                 result['claim_count'] = len(claim_index(record, registry))
+                if ws.master_path is not None:
+                    result['master_missing'] = master_missing(record, ws.master_path)
             elif args.command == 'validate-projection':
                 from .projection import load_projection
                 evidence, registry = _profile(ws, args.evidence, args.registry)

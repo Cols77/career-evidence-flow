@@ -100,7 +100,7 @@ without a full path. Your AI host must be installed and configured separately.
 For a prebuilt distribution, replace `pip install .` with:
 
 ```text
-python -m pip install /path/to/resume_toolkit-0.2.0-py3-none-any.whl
+python -m pip install /path/to/resume_toolkit-0.2.1-py3-none-any.whl
 ```
 
 Use that environment's Python. The wheel needs no repository checkout after
@@ -236,7 +236,7 @@ Maintainers can build the same installable artifacts using:
 python -m pip install ".[dev]"
 python tools/sync_skills.py --check
 python -m pytest -q
-python tools/build_release.py --output dist/0.2.0
+python tools/build_release.py --output dist/0.2.1
 ```
 
 The destination must be new. It receives the wheel, source distribution,

@@ -168,6 +168,15 @@ def claim_index(record: dict[str, Any], registry: Mapping[str, Mapping[str, str]
     return {claim["id"]: claim for item in validated["items"] for claim in item["claims"]}
 
 
+def master_missing(record: dict[str, Any], master: Path) -> list[str]:
+    """Claim IDs the narrative master profile does not name; a missing file names none."""
+    # shortcut: presence of the ID only, a reworded claim under the same ID is not detected; hash claim text if that ever matters.
+    text = master.read_text(encoding="utf-8") if master.is_file() else ""
+    named = {token.rstrip("._-") for token in re.findall(r"[a-z0-9][a-z0-9._-]+", text)}
+    return sorted(claim["id"] for item in record["items"] for claim in item["claims"]
+                  if claim["id"] not in named)
+
+
 def publishable_claims(record: dict[str, Any], registry: Mapping[str, Mapping[str, str]]) -> dict[str, dict[str, Any]]:
     """Select confirmed/approximate allowed claims without altering stored data."""
     return {key: claim for key, claim in claim_index(record, registry).items()

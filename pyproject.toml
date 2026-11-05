@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "resume-toolkit"
-version = "0.2.0"
+version = "0.2.1"
 description = "Agent-led resume and cover-letter workflows with evidence validation and document tools"
 readme = "README.md"
 requires-python = ">=3.11"
