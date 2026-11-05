@@ -4,7 +4,7 @@ import tomllib
 
 
 def test_package_exposes_version():
-    assert __version__ == "0.2.0"
+    assert __version__ == "0.2.1"
 
 
 def test_neutral_distribution_preserves_console_entrypoint():
@@ -23,6 +23,8 @@ def test_repository_is_a_claude_plugin_exposing_the_five_skills():
     import json
     plugin = json.loads((root / ".claude-plugin" / "plugin.json").read_text(encoding="utf-8"))
     assert plugin["name"] == "resume-toolkit" and plugin["version"] == __version__
+    market = json.loads((root / ".claude-plugin" / "marketplace.json").read_text(encoding="utf-8"))
+    assert [entry["version"] for entry in market["plugins"]] == [__version__]  # an unbumped version hides updates
     skills = sorted(p.parent.name for p in (root / "skills").glob("*/SKILL.md"))
     assert skills == ["application-materials", "cover-letter-review", "experience-capture",
                       "job-search", "resume-review"]

@@ -258,3 +258,15 @@ def test_symlinked_integration_directory_is_rejected(installer, project, tmp_pat
     with pytest.raises(ToolkitError):
         install(installer, project)
     assert not list(external.iterdir())
+
+
+def test_claude_install_made_before_the_stop_check_upgrades_in_place(installer, project, monkeypatch):
+    from cv_toolkit import claude_hooks
+    with monkeypatch.context() as older:
+        older.setattr(claude_hooks, 'EVENTS', ('SessionStart', 'UserPromptSubmit'))
+        install(installer, project, host='claude', hooks=True)
+    config = project / '.claude/settings.local.json'
+    assert set(json.loads(config.read_text())['hooks']) == {'SessionStart', 'UserPromptSubmit'}
+    assert install(installer, project, host='claude')['hooks'] == 'updated'
+    assert set(json.loads(config.read_text())['hooks']) == {'SessionStart', 'UserPromptSubmit', 'Stop'}
+    assert install(installer, project, host='claude')['hooks'] == 'unchanged'
