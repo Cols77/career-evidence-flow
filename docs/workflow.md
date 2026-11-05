@@ -2,7 +2,7 @@
 
 The Python package owns structural validation and local persistence. A person or host agent owns interviewing, job extraction, drafting, factual entailment and visual assessment. Validation output is not approval.
 
-Workspace configuration uses `[profile]` display_name and optional email/export_name; `[paths]` profile, applications, styles and outputs; optional `[ats]` phone_pattern. Paths must remain beneath the explicit workspace. Generic rendering uses packaged styles rather than a repository checkout or arbitrary workspace CSS.
+Workspace configuration uses `[profile]` display_name and optional email/export_name; `[paths]` profile, applications, styles and outputs, plus an optional `master` naming a narrative master profile that must name every evidence claim ID (`cv validate-evidence` reports the gaps as `master_missing`, and the Claude `Stop` hook blocks the first stop while any remain); optional `[ats]` phone_pattern. Paths must remain beneath the explicit workspace. Generic rendering uses packaged styles rather than a repository checkout or arbitrary workspace CSS.
 
 Evidence uses **string** `schema_version: "1"`, a candidate_id and items. Each item has id, kind and claims. Supported kinds: identity, experience, project, education, training, award, skill, language and preference. Claims have globally unique id, text, status, publication and source IDs; optional ownership, maturity and limitations are preserved. A source registry is a list of `{source_id, kind, fingerprint}` records. Confirmed/approximate claims with allowed publication can be selected. Stored uncertain, excluded and superseded claims remain stored and are not publishable. Fingerprints are opaque supplied declarations, not source authentication.
 

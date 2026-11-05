@@ -103,7 +103,7 @@ def test_claude_installed_runner_routes_project_with_no_profile_mutations(projec
     before = {p.relative_to(workspace): p.read_bytes() for p in workspace.rglob('*') if p.is_file()}
     count = install_entry_hook(workspace, 'claude', project_root=project)
     config = json.loads((project / '.claude/settings.local.json').read_text())
-    assert set(config['hooks']) == {'SessionStart', 'UserPromptSubmit'}
+    assert set(config['hooks']) == {'SessionStart', 'UserPromptSubmit', 'Stop'}
     assert count > 1
     handler = config['hooks'][event][0]['hooks'][0]
     assert handler['args'][0] == '-I'
@@ -120,14 +120,14 @@ def test_claude_preserves_existing_settings_and_hooks(project):
     config_path = project / '.claude/settings.local.json'
     config_path.parent.mkdir()
     existing_hook = {'hooks': [{'type': 'command', 'command': 'existing-owner-command'}]}
-    existing = {'permissions': {'allow': ['Read']}, 'hooks': {'SessionStart': [existing_hook], 'Stop': []}}
+    existing = {'permissions': {'allow': ['Read']}, 'hooks': {'SessionStart': [existing_hook], 'PreToolUse': []}}
     config_path.write_text(json.dumps(existing))
     install_entry_hook(project / 'user-profile', 'claude', project_root=project)
     actual = json.loads(config_path.read_text())
     assert actual['permissions'] == existing['permissions']
     assert actual['hooks']['SessionStart'][0] == existing_hook
     assert len(actual['hooks']['SessionStart']) == 2
-    assert actual['hooks']['Stop'] == []
+    assert actual['hooks']['PreToolUse'] == []
     before = config_path.read_bytes()
     with pytest.raises(ToolkitError):
         install_entry_hook(project / 'user-profile', 'claude', project_root=project)
@@ -193,3 +193,35 @@ def test_claude_same_root_default_remains_supported(tmp_path):
     install_entry_hook(workspace, 'claude')
     result = run_bundle(workspace, 'claude', workspace, payload(workspace))
     assert 'experience-capture' in json.loads(result.stdout)['hookSpecificOutput']['additionalContext']
+
+
+def test_claude_stop_blocks_once_while_master_profile_lacks_a_claim(tmp_path, capsys):
+    from cv_toolkit.cli import main
+    project = tmp_path / 'project'
+    project.mkdir()
+    workspace = init_workspace(project / 'user-profile', example='showcase')
+    install_entry_hook(workspace, 'claude', project_root=project)
+    stop = payload(project, 'Stop')
+
+    def hook(data=stop):
+        return json.loads(run_bundle(project, 'claude', workspace, data).stdout)
+
+    def missing():
+        capsys.readouterr()
+        assert main(['validate-evidence', '--workspace', str(workspace)]) == 0
+        return json.loads(capsys.readouterr().out).get('master_missing')
+
+    assert hook() == {} and missing() is None  # no master configured: nothing changes
+    config = workspace / 'cvtool.toml'
+    config.write_text(config.read_text(encoding='utf-8').replace(
+        '[paths]\n', '[paths]\nmaster = "profile/master.md"\n'), encoding='utf-8')
+    ids = missing()
+    assert ids and hook()['decision'] == 'block'  # a missing master file names no claim
+    master = workspace / 'profile/master.md'
+    master.write_text(''.join(f'- `{claim}`.\n' for claim in ids[1:]), encoding='utf-8')
+    assert missing() == ids[:1]
+    held = hook()
+    assert held['decision'] == 'block' and ids[0] in held['reason'] and ids[1] not in held['reason']
+    assert hook({**stop, 'stop_hook_active': True}) == {}  # never loop a session
+    master.write_text(master.read_text(encoding='utf-8') + f'See {ids[0]}.\n', encoding='utf-8')
+    assert missing() == [] and hook() == {}

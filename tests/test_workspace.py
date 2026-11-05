@@ -37,6 +37,16 @@ def test_loads_valid_config_without_creating_directories(tmp_path):
     assert not (tmp_path / "profile").exists()
 
 
+def test_optional_master_profile_path_is_confined(tmp_path):
+    write_config(tmp_path, valid_config())
+    assert Workspace.load(tmp_path).master_path is None
+    write_config(tmp_path, valid_config().replace('[paths]\n', '[paths]\nmaster = "profile/master.md"\n'))
+    assert Workspace.load(tmp_path).master_path == tmp_path.resolve() / "profile/master.md"
+    write_config(tmp_path, valid_config().replace('[paths]\n', '[paths]\nmaster = "../outside.md"\n'))
+    with pytest.raises(WorkspaceError, match="invalid master path"):
+        Workspace.load(tmp_path)
+
+
 def test_optional_contact_fields_are_absent_not_empty_defaults(tmp_path):
     write_config(tmp_path, valid_config().replace('email = "zoe@example.test"\n', "").replace(
         '[ats]\nphone_pattern = "^[0-9]+$"', "[ats]"

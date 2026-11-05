@@ -76,6 +76,7 @@ class Workspace:
     applications_dir: Path
     styles_dir: Path
     outputs_dir: Path
+    master_path: Path | None = None
 
     @classmethod
     def load(cls, root: Path) -> "Workspace":
@@ -128,4 +129,5 @@ class Workspace:
             applications_dir=_confined(root, paths.get("applications"), "applications path"),
             styles_dir=_confined(root, paths.get("styles"), "styles path"),
             outputs_dir=_confined(root, paths.get("outputs"), "outputs path"),
+            master_path=None if paths.get("master") is None else _confined(root, paths["master"], "master path"),
         )
