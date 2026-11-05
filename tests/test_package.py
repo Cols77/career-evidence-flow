@@ -31,3 +31,9 @@ def test_repository_is_a_claude_plugin_exposing_the_five_skills():
     for name in skills:
         head = (root / "skills" / name / "SKILL.md").read_text(encoding="utf-8").split("---")[1]
         assert f"name: {name}" in head and "description:" in head
+
+
+def test_workflow_runs_the_suite_and_skill_check_on_linux_and_windows():
+    workflow = (Path(__file__).resolve().parents[1] / ".github/workflows/tests.yml").read_text(encoding="utf-8")
+    for needed in ("ubuntu-latest", "windows-latest", "python -m pytest -q", "python tools/sync_skills.py --check"):
+        assert needed in workflow
