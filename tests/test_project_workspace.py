@@ -1,6 +1,7 @@
 """Explicit project discovery roots keep the ordinary candidate data schema."""
 import json
 from pathlib import Path
+import os
 import sys
 import subprocess
 import shutil
@@ -52,7 +53,7 @@ def test_setup_binds_nested_standard_workspace_to_project_hosts(tmp_path, capsys
         assert (project / path).read_bytes() == content
     guide = (project / 'RESUME_TOOLKIT.md').read_text(encoding='utf-8')
     assert str(workspace.resolve()) in guide
-    assert str(Path(sys.executable).resolve()) in guide
+    assert os.path.abspath(sys.executable) in guide  # the environment's own python, not its symlink target
     assert 'cv_toolkit.cli' in guide
     assert '--project-root' in guide
     installed = snapshot(project)
