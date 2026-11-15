@@ -1,0 +1,6 @@
+log/*.jsonl merge=union
+intents/*.md merge=iaso-record
+requirements/*.md merge=iaso-record
+decisions/*.md merge=iaso-record
+features/*.md merge=iaso-record
+ncs/*.md merge=iaso-record

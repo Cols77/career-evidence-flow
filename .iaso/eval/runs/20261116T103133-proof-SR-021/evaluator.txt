@@ -1,0 +1,5 @@
+Verdict: **not verified**. I've written `verdict.json`. I judged this by reading the changed skill files. I didn't run a session case, because the proof only asks for a read.
+
+- **EX-1 (questions asked before drafting):** the change does this. `drafting-workflow.md` now asks why this company, other motivations and what to put forward for every letter, even when the evidence looks sufficient. It waits for the answers.
+- **EX-3 (employer forbids a letter):** the change does this. A no-letter instruction removes the letter and its questions.
+- **EX-2 (owner skips the questions):** the change contradicts it. The new text says "there is no skip path, so never draft the letter without them". The old wording allowed a neutral opening with the gap noted in the private notes. That wording was deleted. SR-021 says the workflow "waits for answers or an explicit skip", so the change drops the skip handling.

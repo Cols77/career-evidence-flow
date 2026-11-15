@@ -1,0 +1,9 @@
+I wrote `verdict.json` with a verdict of **verified**. I judged this by reading the skill text; I ran no live iaso session, because the proof asks for an independent read.
+
+- **EX-1:** Step 5 of `skills/application-materials/SKILL.md` and line 53 of `references/drafting-workflow.md` require the questions on every requested letter. They ask why this company, what else motivates the application, and what the owner wants to put forward. They ask even when the evidence looks sufficient, and say "there is no skip path, so never draft the letter without them".
+- **EX-2:** An answer already recorded for the same company is shown, and the owner is asked only for confirmation or additions.
+- **EX-3:** A no-letter employer instruction removes the letter deliverable and these questions.
+
+The same text appears in the `.agents`, `.claude` and `src/cv_toolkit/assets` copies of the skill.
+
+The review skills still say to "respect explicit declines" and that unknown motivation permits neutral wording. These apply after the owner has answered "unknown" or declined. They don't let the workflow skip asking, so I don't count them as a contradiction.

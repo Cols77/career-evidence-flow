@@ -1,0 +1,7 @@
+# SR: trailer policy (iaso trailers check-msg, iaso claims check).
+require_trailer: false
+# Extra exempt globs (the defaults .iaso/**, docs/**, .claude/**, uv.lock, .gitignore and
+# .gitattributes always apply).
+exempt: []
+# NC-backed baseline of undeclared paths; it may only shrink: [{commit, path, nc}]
+baseline: []
