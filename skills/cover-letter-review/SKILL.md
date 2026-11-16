@@ -9,7 +9,7 @@ Explicitly assess transitions, sentence rhythm and natural reading using the [co
 
 Within that pass, inspect each sentence's literal meaning, including whether verbs, prepositions and pronouns correctly relate companies, teams, products and projects. Record the relationships actually checked, not just a generic fluency pass. A user-reported editorial defect reopens the affected verdict even when the source bytes are unchanged.
 
-Explicitly review the last body paragraph, conclusion and sign-off as a sequence. Record why the ending follows naturally and feels complete, or give a narrow repair for an abrupt or presumptive closing. Check the rendered closing/signature after revision; do not enforce a fixed closing formula or invent availability and other facts.
+Explicitly review the last body paragraph, conclusion and sign-off as a sequence. Record why the ending follows naturally and feels complete, or give a narrow repair for an abrupt or presumptive closing. Check the rendered closing/signature after revision; require thanks, specific enthusiasm and a clear next step with a sign-off matching the salutation, without enforcing a fixed closing formula or inventing availability and other facts.
 
 Review independently against actual candidate evidence, application answers, employer requirements and the final resume. Read [the review packet](references/review-packet.md) and [the rubric](references/rubric.md).
 
