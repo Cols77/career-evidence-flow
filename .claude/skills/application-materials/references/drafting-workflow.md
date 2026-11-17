@@ -26,6 +26,8 @@ Capture actual answers once with provenance using experience-capture. Add reusab
 
 ## Resume
 
+Apply the [document conventions](document-conventions.md) for region, section order, challenge-action-result bullets, opening verbs, what to leave out and the summary. They rank below evidence, employer instructions and the owner's recorded writing preferences.
+
 Choose sections and ordering for the role and the person's actual background. Do not force training, awards or a summary when they add no supported value. Use actual supplied identity/contact facts, dates, degrees and availability. The default workspace name is not verified identity.
 
 Write the summary last, for a reader who knows the role but not the candidate. Open with a throughline that connects the candidate's areas, then give two or three supported highlights in outcome language. Say what a project does for its user before how it works; mechanisms such as hashing, gates or schedulers belong in bullets. Choose wording that is true without qualifiers ("cut test runtime by about half without losing coverage") instead of dropping a condition or stacking caveats; detailed conditions stay in the bullet. Do not undersell supported facts with defensive hedges or weak labels the evidence does not require. Each sentence carries one idea: the summary is a short pitch, not a compressed list of claims.
@@ -47,6 +49,8 @@ Use JD keywords only when their meaning matches the candidate's actual experienc
 Apply its action-led, one-contribution-per-bullet review to every resume bullet. Keep labelled skill and education inventories outside bullet lists. Put professional links in the same contact paragraph as the location, phone and email, above the header divider; let the row wrap naturally on small screens and inspect the final PDF for spacing.
 
 ## Cover letter
+
+Apply the letter part of the [document conventions](document-conventions.md): tone matched to the employer type, a named addressee where one is sourced, the regional sign-off, the common mistakes to avoid and the special-circumstance rules (a gap is mentioned only if the owner decides so). They rank below evidence, employer instructions and the owner's recorded writing preferences.
 
 Before writing, record a brief hiring argument in private working notes: the employer's main need, the supported contribution this candidate can make, and the one or two best examples with their evidence references. Explain why these examples earn space over other resume content. This is a drafting aid, not a new record schema or a claim that future impact is proven.
 
