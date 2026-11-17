@@ -17,7 +17,7 @@ Current rendering produces `unreviewed_preview`; application status is always `d
 ## Review coverage by host
 
 Each required angle needs its own verdict: resume factual, alignment, voice and visual;
-cover letter factual, persuasiveness, motivation, voice and visual. `cv record-review` stores
+cover letter factual, persuasiveness, differentiation, motivation, voice and visual. `cv record-review` stores
 one declared verdict per angle beside the bundle, with the hashes of the reviewed artifacts.
 `cv review-status` lists each angle as recorded, missing, stale or unavailable. A verdict
 is a declaration: it does not authenticate the reviewer or approve anything.

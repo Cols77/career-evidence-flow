@@ -175,7 +175,7 @@ evidence, questions, answers, policy and corrections.
 | [job-search](skills/job-search/SKILL.md) | Find and screen jobs; retain preferences, eligibility unknowns and application requirements. |
 | [application-materials](skills/application-materials/SKILL.md) | Orchestrate the job-to-resume-and-letter workflow and its review handoffs. |
 | [resume-review](skills/resume-review/SKILL.md) | Independently review evidence, job alignment, voice, skills, ATS extraction and page layout. |
-| [cover-letter-review](skills/cover-letter-review/SKILL.md) | Independently review facts, persuasiveness, motivation, employer relevance, consistency and layout. |
+| [cover-letter-review](skills/cover-letter-review/SKILL.md) | Independently review facts, persuasiveness, differentiation, motivation, employer relevance, consistency and layout. |
 
 Canonical skills live in `skills/`. Generated copies use `.agents/skills/` for
 Codex and `.claude/skills/` for Claude Code; setup installs `.hermes/skills/` for

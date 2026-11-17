@@ -48,7 +48,7 @@ def test_status_lists_recorded_and_missing_angles(application, capsys):
     code, status = invoke(capsys, root, 'review-status', '--bundle', BUNDLE)
     assert code == 0 and status['coverage'] == 'incomplete'
     assert status['missing'] == ['cover_letter.' + a for a in
-                                 ('factual', 'persuasiveness', 'motivation', 'voice', 'visual')]
+                                 ('factual', 'persuasiveness', 'differentiation', 'motivation', 'voice', 'visual')]
 
 
 def test_changed_artifact_turns_its_verdict_stale(application, capsys):

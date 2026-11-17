@@ -270,7 +270,7 @@ def verify_bundle(workspace, bundle):
 
 
 ANGLES = {'resume': ('factual', 'alignment', 'voice', 'readability', 'visual'),
-          'cover_letter': ('factual', 'persuasiveness', 'motivation', 'voice', 'visual')}
+          'cover_letter': ('factual', 'persuasiveness', 'differentiation', 'motivation', 'voice', 'visual')}
 VERDICTS = ('pass', 'findings', 'unavailable')
 
 
