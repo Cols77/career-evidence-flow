@@ -30,7 +30,7 @@ page_layout questions records render resume_layout workspace
 """.split()
 STYLES = "ats branded letter minimal modern resume-layout".split()
 SKILLS = {
-    'job-search': ('search-records',),
+    'job-search': ('browser-research', 'search-records'),
     "application-materials": ("application-records", "document-conventions", "drafting-workflow", "voice-and-artifacts"),
     "experience-capture": ("evidence-and-interview",),
     "resume-review": ("review-packet", "rubric"),

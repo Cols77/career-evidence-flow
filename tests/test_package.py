@@ -4,7 +4,7 @@ import tomllib
 
 
 def test_package_exposes_version():
-    assert __version__ == "0.2.11"
+    assert __version__ == "0.2.12"
 
 
 def test_neutral_distribution_preserves_console_entrypoint():

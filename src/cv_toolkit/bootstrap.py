@@ -263,7 +263,7 @@ def _install_claude_hook(root, project, *, _payload_only=False):
         f'raise SystemExit(main(folder.parents[2], {root.relative_to(project).as_posix()!r}))\n'
     )
     payload = [('run.py', runner.encode('utf-8'))]
-    for module in (*_HOOK_DEPENDENCIES, 'onboarding.py', 'claude_hooks.py'):
+    for module in (*_HOOK_DEPENDENCIES, 'onboarding.py', 'codex_hooks.py', 'claude_hooks.py'):
         payload.append((f'cv_toolkit/{module}', files('cv_toolkit').joinpath(module).read_bytes()))
     # Claude's documented exec form avoids shell interpretation on all platforms.
     handler = {'type': 'command', 'command': str(Path(sys.executable).resolve()),

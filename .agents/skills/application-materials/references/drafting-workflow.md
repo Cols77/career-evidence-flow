@@ -139,3 +139,13 @@ Use `resume-review` and `cover-letter-review`. Delegate to actual independent su
 Apply supported repairs, update working support notes, render a new revision and rerun affected reviewers/checks. Changes to facts, answers, JD, policy, text, styles or artifacts invalidate related review notes; the host tracks this manually. Stop after two review/repair rounds and report remaining findings.
 
 Return requested artifacts and a short account of evidence gaps, actual reviews, visual capabilities and remaining findings. Existing commands always yield previews. Authenticated claim maps, enforced review freshness and guarded exact-byte release are unavailable; independent review notes do not create submission authorization.
+
+## Owner edits of a release
+
+Every revision folder holds `resume.md` and `cover-letter.md` at its top: editable copies of the exact sources it was built from. They are outside the bundle hashes, so editing them never stales that revision or its recorded reviews. The owner edits them and asks, in plain words, for a regeneration.
+
+1. Run `cv regenerate --workspace ROOT --from outputs/SLUG/rNN --diff`. It builds nothing and returns, per edited file, a unified diff against the frozen source under `inputs/`. A revision built before editable copies existed has none; copy its frozen source to the top of the folder first when the owner wants to edit it.
+2. Read every changed hunk and classify it. A rewrite (new or changed document text) is the owner's wording: keep it as written. A note (an instruction to you, in any form: a comment, a bracketed remark, a line such as "shorten this") is carried out in the document and then removed. When a hunk could be either, ask.
+3. A rewrite or note that introduces a fact absent from the evidence (a metric, technology, date, scope or result) is a material question: ask the owner, persist the answer into canonical evidence with provenance and update the master profile before building. Never publish an unsupported fact because the owner typed it.
+4. Write the result back into the same top-level copies, so no note text remains, then run `cv regenerate --workspace ROOT --from outputs/SLUG/rNN`. It copies them over the application sources (even when those changed after rNN; every revision keeps its own frozen copy) and builds the next free revision with the same styles, format, page images and extra inputs, running the same checks.
+5. Continue from step 7 of the workflow on the new revision: page balance and layout repairs, the full review pipeline, and repairs of its findings, the owner's text included, exactly as for an agent draft. Report what changed in the owner's wording and why.

@@ -63,7 +63,7 @@ def _parser():
     gallery.add_argument('--output', type=Path, required=True, help='New directory for the comparison')
     gallery.add_argument('--format', choices=('html', 'both'), default='html',
                          help='HTML comparison, optionally with PDF previews (requires Chromium)')
-    for command in ('onboard', 'validate-evidence', 'validate-projection', 'render', 'check', 'install-skills', 'install-hooks', 'install-agent', 'create-application', 'status', 'answer', 'resolve-question', 'workflow-checkpoint', 'workflow-status', 'application-context', 'build-application', 'verify-bundle', 'record-review', 'review-status'):
+    for command in ('onboard', 'validate-evidence', 'validate-projection', 'render', 'check', 'install-skills', 'install-hooks', 'install-agent', 'create-application', 'status', 'answer', 'resolve-question', 'workflow-checkpoint', 'workflow-status', 'application-context', 'build-application', 'verify-bundle', 'record-review', 'review-status', 'regenerate', 'review-plan'):
         item = sub.add_parser(command)
         item.add_argument('--workspace', type=Path, required=True)
         if command in ('application-context', 'build-application'):
@@ -75,8 +75,14 @@ def _parser():
             item.add_argument('--style', choices=RESUME_STYLES, action='append', help='Repeat for resume variants; default: ats and branded')
             item.add_argument('--include', action='append', default=[], help='Extra workspace-relative source, prior answer or support note to snapshot')
             item.add_argument('--page-images', action='store_true', help='Rasterize every PDF page (requires visual extra)')
-        if command in ('verify-bundle', 'record-review', 'review-status'):
+        if command in ('verify-bundle', 'record-review', 'review-status', 'review-plan'):
             item.add_argument('--bundle', required=True, help='Workspace-relative bundle.json')
+        if command == 'regenerate':
+            item.add_argument('--from', dest='revision', required=True, help='Workspace-relative revision directory whose top-level Markdown was edited')
+            item.add_argument('--diff', action='store_true', help='Only print the edits against the frozen sources')
+        if command == 'review-plan':
+            item.add_argument('--command', dest='cv_command', default='cv', help='Command prefix written into the reviewer briefs')
+            item.add_argument('--angle', help='One angle key such as resume.factual; default: every missing or stale angle')
         if command == 'record-review':
             item.add_argument('--document', choices=('resume', 'cover_letter'), required=True)
             item.add_argument('--angle', required=True, help='resume: factual, alignment, voice, readability, visual; cover_letter: factual, persuasiveness, motivation, voice, visual')
@@ -169,7 +175,13 @@ def main(argv=None):
                 result.update(checkpoint_status(args.workspace, args.session_id))
         else:
             ws = Workspace.load(args.workspace)
-            if args.command in ('record-review', 'review-status'):
+            if args.command == 'regenerate':
+                from .application_tools import regenerate
+                result.update(regenerate(ws, args.revision, diff=args.diff))
+            elif args.command == 'review-plan':
+                from .application_tools import review_plan
+                result.update(review_plan(ws, args.bundle, command=args.cv_command, angle=args.angle))
+            elif args.command in ('record-review', 'review-status'):
                 from .application_tools import record_review, review_status
                 result.update(review_status(ws, args.bundle) if args.command == 'review-status' else
                               record_review(ws, args.bundle, args.document, args.angle, args.verdict,

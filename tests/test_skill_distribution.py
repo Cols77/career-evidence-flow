@@ -67,3 +67,21 @@ def test_repository_and_wheel_skill_copies_are_current():
 def test_experience_capture_requires_the_master_profile_update():
     text = (Path(__file__).resolve().parents[1] / 'skills/experience-capture/SKILL.md').read_text(encoding='utf-8')
     assert '[paths] master' in text and 'master_missing' in text
+
+
+def test_application_materials_turns_owner_release_edits_into_a_reviewed_revision():
+    skills = Path(__file__).resolve().parents[1] / 'skills/application-materials'
+    entry = (skills / 'SKILL.md').read_text(encoding='utf-8')
+    steps = (skills / 'references/drafting-workflow.md').read_text(encoding='utf-8')
+    assert 'owner-edits-of-a-release' in entry and 'cv regenerate' in entry
+    section = steps[steps.index('## Owner edits of a release'):]
+    for step in ('--diff', 'keep it as written', 'carried out in the document and then removed',
+                 'ask the owner, persist the answer', 'the full review pipeline', "the owner's text included"):
+        assert step in section, step
+
+
+def test_codex_dispatches_reviewers_from_the_shared_briefs():
+    root = Path(__file__).resolve().parents[1]
+    entry = (root / 'skills/application-materials/SKILL.md').read_text(encoding='utf-8')
+    assert 'On Codex, run `cv review-plan' in entry and 'one fresh subagent per key' in entry
+    assert 'review-plan' in (root / '.claude/workflows/review-angles.js').read_text(encoding='utf-8')

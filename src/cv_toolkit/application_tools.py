@@ -2,6 +2,7 @@
 from datetime import datetime, timezone
 from hashlib import sha256
 from importlib.resources import files
+import difflib
 import os
 from pathlib import Path
 import re
@@ -12,8 +13,11 @@ from .application import load_application
 from .deployment import _git, _ignore_check
 from .evidence import build_source_registry, load_evidence
 from .questions import load_questions, pending_questions
-from .records import ToolkitError, atomic_write_json, confined, load_json, nonempty, object_fields, schema
+from .records import ToolkitError, atomic_write_bytes, atomic_write_json, confined, load_json, nonempty, object_fields, schema
 from .workspace import Workspace
+
+
+EDITABLE = {'resume': 'resume.md', 'cover_letter': 'cover-letter.md'}
 
 
 def _relative(workspace, path):
@@ -192,10 +196,14 @@ def build_application(workspace, application, output, *, output_format='both',
                     'page_images': page_images, 'output_ignore': ignore,
                     'review_status': 'unreviewed_preview', 'release_available': False}
         atomic_write_json(staging / 'bundle.json', manifest)
+        # Owner-editable copies: deliberately unhashed, so editing them stales no review.
+        for kind in context['policy']['deliverables']:
+            (staging / EDITABLE[kind]).write_bytes(snapshots[context['inputs'][kind + '_source']])
         if ignore['enforced']:
             # Test every actual destination, including copied source files, against
             # nested ignore exceptions before publishing any part of the revision.
-            targets = [(destination / p).as_posix() for p in (*artifacts, 'bundle.json')]
+            editable = [EDITABLE[kind] for kind in context['policy']['deliverables']]
+            targets = [(destination / p).as_posix() for p in (*artifacts, 'bundle.json', *editable)]
             result = _git(workspace.root, 'check-ignore', '-z', '--stdin',
                           input=('\0'.join(targets) + '\0').encode('utf-8'))
             if result is None or result.returncode != 0 or set(result.stdout.decode('utf-8').split('\0')) - {''} != set(targets):
@@ -342,4 +350,84 @@ def review_status(workspace, bundle):
                 for s in ('missing', 'stale', 'unavailable')}
     return {'angles': angles, **by_state,
             'coverage': 'complete' if all(v['state'] == 'recorded' for v in angles.values()) else 'incomplete',
+            'review_status': 'unreviewed_preview', 'release_available': False}
+
+
+def regenerate(workspace, revision, *, diff=False):
+    """Build the next revision from the owner's edits of a revision's editable Markdown copies.
+
+    With diff, only report the edits against the frozen sources. Otherwise the edits
+    overwrite the application sources (the owner's choice; every revision keeps its
+    own frozen copy) and the next free rNN is built with the source revision's options.
+    """
+    folder = confined(workspace.root, revision)
+    folder.relative_to(workspace.outputs_dir)
+    _, record = _reviewed_bundle(workspace, _relative(workspace, folder / 'bundle.json'))
+    context = record['context']
+    edits = {}
+    for kind in context['policy']['deliverables']:
+        source = context['inputs'][kind + '_source']
+        frozen = (folder / 'inputs' / source).read_bytes()
+        copy = folder / EDITABLE[kind]
+        # A revision built before editable copies existed is regenerated unchanged.
+        edits[source] = (EDITABLE[kind], frozen, copy.read_bytes() if copy.is_file() else frozen)
+    if diff:
+        changes = {name: ''.join(difflib.unified_diff(
+                       frozen.decode('utf-8').splitlines(True), edited.decode('utf-8').splitlines(True),
+                       'inputs/' + source, name))
+                   for source, (name, frozen, edited) in edits.items() if edited != frozen}
+        return {'from': _relative(workspace, folder), 'changes': changes,
+                'review_status': 'unreviewed_preview', 'release_available': False}
+    numbers = [int(m[1]) for m in (re.fullmatch(r'r(\d+)', c.name) for c in folder.parent.iterdir()) if m]
+    output = _relative(workspace, folder.parent / f'r{max(numbers, default=0) + 1:02d}')
+    styles = tuple(dict.fromkeys(d[len('resume-'):-len('.html')] for d in record['documents']
+                                 if d.startswith('resume-') and d.endswith('.html'))) or ('ats', 'branded')
+    includes = [p for p in record['workspace_inputs'] if p not in context['inputs'].values()]
+    for source, (_, _, edited) in edits.items():
+        atomic_write_bytes(confined(workspace.root, source, required=False), edited)
+    result = build_application(workspace, context['application'], output,
+                               output_format='both' if any(d.endswith('.pdf') for d in record['documents']) else 'html',
+                               styles=styles, includes=includes, page_images=record['page_images'])
+    return {**result, 'from': _relative(workspace, folder)}
+
+
+def _brief(workspace, bundle, document, angle, command):
+    root = str(workspace.root)
+    findings = bundle[:-len('bundle.json')] + f'review-{document}-{angle}.md'
+    record = f"{command} record-review --workspace '{root}' --bundle '{bundle}' --document {document} --angle {angle}"
+    skill = 'resume-review' if document == 'resume' else 'cover-letter-review'
+    if angle == 'readability':
+        # The readability reviewer must not know the evidence: insiders cannot see their own jargon.
+        scope = ('You are a cold reader. Read ONLY the rendered resume artifact and the frozen job text in inputs/; '
+                 'never open evidence, registry, sources, notes, projection or requirements. '
+                 'For each summary sentence and bullet, restate in one plain sentence what was done and why it matters. '
+                 'Report terms you cannot explain from general engineering knowledge or the JD, mechanism before outcome, '
+                 'several independent contributions in one bullet, and bullets past two lines; medium when the core point '
+                 'is lost, low otherwise. Repairs replace or drop insider terms, they never add explanations. '
+                 'Do not judge factual support.')
+    else:
+        scope = ('Read review-packet.md and the frozen inputs/ beside that bundle, and the exact rendered artifacts it lists'
+                 + ('; inspect every PDF page image with a visual tool, and if none is available your verdict is unavailable'
+                    if angle == 'visual' else '') + '.')
+    return (f'You are an independent reviewer: you did not write these documents. Use the {skill} skill, '
+            f'but review ONLY its "{angle}" angle for the {document.replace("_", " ")} of the revision {bundle} '
+            f'in the workspace {root}. {scope}\n'
+            'Then record your verdict yourself, once:\n'
+            f'- no concrete defect: {record} --verdict pass --reviewer review-angles\n'
+            f'- defects: write them (affected unit, evidence reference, severity, narrow repair) to {findings} '
+            f"under the workspace, then the same command with --verdict findings --findings '{findings}'\n"
+            '- you could not review this angle (missing input or tool): the same command with --verdict unavailable, '
+            'and say why in your summary.\n'
+            'Never edit the documents, the evidence or the bundle. Never claim approval.')
+
+
+def review_plan(workspace, bundle, *, command='cv', angle=None):
+    """The angles still needing a verdict and the one reviewer brief for each, shared by every host."""
+    status = review_status(workspace, bundle)
+    todo = status['missing'] + status['stale']
+    if angle is not None and angle not in status['angles']:
+        raise ToolkitError('unknown review angle for this bundle')
+    keys = [angle] if angle is not None else todo
+    bundle = _relative(workspace, confined(workspace.root, bundle))
+    return {'todo': todo, 'briefs': {key: _brief(workspace, bundle, *key.split('.'), command) for key in keys},
             'review_status': 'unreviewed_preview', 'release_available': False}
