@@ -22,11 +22,11 @@ restoration remains unverified.
 The owner may edit the `resume.md` or `cover-letter.md` at the top of a revision folder and ask you to regenerate. Do all of these steps, in order; details are in [owner edits of a release](references/drafting-workflow.md#owner-edits-of-a-release).
 
 1. Run `cv regenerate --workspace ROOT --from outputs/SLUG/rNN --diff` and read every changed hunk.
-2. A rewrite is the owner's text: keep it word for word. Never revert, drop or soften it on your own, even when it looks unsupported.
+2. A rewrite is the owner's text: keep it word for word while regenerating. Never revert, drop or soften it on your own judgment, even when it looks unsupported; only step 4 (an owner's answer) or step 6 (a reviewer finding) may change it.
 3. A note (an instruction to you, in any form) is carried out in the document, then removed.
 4. A rewrite or note that adds a fact absent from the evidence (a metric, technology, date, scope or result) is a material question: stop and ask the owner before building. Record the answer in canonical evidence with provenance and in the master profile. Only if the owner says it is wrong may the text change.
 5. Write the result into the same top-level copies, then run `cv regenerate --workspace ROOT --from outputs/SLUG/rNN`.
-6. Review the new revision in full, exactly as step 7 below: page balance, every review angle (`review-angles` on Claude Code, `cv review-plan` subagents on Codex), repairs of findings including in the owner's text, and `cv review-status` before you reply. Regenerating without this review is not finished.
+6. Review the new revision in full, exactly as step 7 below: page balance, every review angle (`review-angles` on Claude Code, `cv review-plan` subagents on Codex), and `cv review-status` before you reply. Repair every concrete finding, including findings on the owner's text, without asking: the owner chose that reviewer findings are repaired like an agent draft. Edit the top-level copies of the new revision, regenerate from it, and re-review the affected angles (at most two rounds). Ask only when a repair would need a fact absent from the evidence (step 4); a narrower or reworded claim that the evidence supports needs no question. Regenerating without this review is not finished.
 7. Report what changed in the owner's wording and why.
 
 Own the application workflow as the host agent: understand the JD, reuse evidence, ask material questions, draft both documents and obtain independent review. Python supplies reliable local operations. Read [application records](references/application-records.md) and [the drafting workflow](references/drafting-workflow.md).
