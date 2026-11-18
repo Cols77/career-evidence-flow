@@ -150,6 +150,10 @@ def atomic_write_json(path: Path, value):
         raise
     except (TypeError, ValueError, UnicodeError, RecursionError, OverflowError):
         raise ToolkitError('invalid JSON record') from None
+    atomic_write_bytes(path, raw)
+
+
+def atomic_write_bytes(path: Path, raw: bytes):
     temporary = None
     try:
         path = Path(path)
@@ -160,7 +164,7 @@ def atomic_write_json(path: Path, value):
             os.fsync(stream.fileno())
         os.replace(temporary, path)
     except (OSError, ValueError):
-        raise ToolkitError('cannot write JSON record') from None
+        raise ToolkitError('cannot write record') from None
     finally:
         if temporary is not None:
             temporary.unlink(missing_ok=True)

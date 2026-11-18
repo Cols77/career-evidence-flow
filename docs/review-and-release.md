@@ -26,9 +26,21 @@ On Claude Code the saved `review-angles` workflow (`.claude/workflows/review-ang
 dispatches one fresh reviewer per missing or stale angle and records each verdict. Reviewers run on
 Sonnet by default (pass `model` in the workflow args to change it); the two status steps run on Haiku.
 The resume `readability` reviewer reads only the rendered resume and the frozen job text, never the
-evidence, so it reads the page the way a recruiter does. Codex and
-Hermes have no equivalent here: they rely on the skill instruction to dispatch one reviewer
-per angle, and `cv review-status` is how a missed angle becomes visible there.
+evidence, so it reads the page the way a recruiter does. The reviewer briefs come from
+`cv review-plan --workspace ROOT --bundle BUNDLE`, which lists the angles still needing a verdict
+and prints one brief per angle. On Codex the application-materials skill spawns one fresh subagent
+per listed angle with that brief, so both hosts review alike. Hermes relies on the same briefs
+through the skill instruction, and `cv review-status` is how a missed angle becomes visible there.
+
+## Editing a release yourself
+
+Each revision folder holds `resume.md` and `cover-letter.md` at its top. They are copies of the
+exact sources, outside the bundle hashes: edit them freely, rewriting text or leaving notes for the
+agent in any form. Then tell the agent, in plain words, to regenerate. It reads
+`cv regenerate --from outputs/SLUG/rNN --diff`, keeps your rewrites, carries out your notes, asks
+about any new fact, runs `cv regenerate` to build the next revision with the same styles and
+checks, and runs the full review. `cv regenerate` alone builds without reviews; the application
+sources are overwritten by your edits, and every revision keeps its own frozen copy.
 
 ## Cover-letter editorial regression scenarios
 

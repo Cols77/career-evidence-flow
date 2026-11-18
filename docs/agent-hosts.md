@@ -31,7 +31,7 @@ Launch Claude Code from this checkout. Generated project skills are in `.claude/
 For a separate workspace, use `cv install-skills --workspace ROOT --host claude` and confirm the command is available in a session there. Reload or restart if the host does not pick up a newly created top-level skills directory.
 
 Optional entry hooks install with `cv install-hooks --workspace user-profile --project-root . --host claude`.
-They merge `SessionStart` and `UserPromptSubmit` command groups into
+They merge `SessionStart`, `UserPromptSubmit`, `PreCompact` and `Stop` command groups into
 `.claude/settings.local.json`, preserve unrelated settings and hooks, and refuse
 conflicting toolkit installations. The bundled runner and validators live in
 `.claude/hooks/resume-toolkit/`. Inspect those files and restart Claude Code in
@@ -39,11 +39,15 @@ the project. The adapter uses command hooks with an executable and an `args`
 array; the installed host must support that form. See
 [Claude hooks](https://code.claude.com/docs/en/hooks).
 
-Both events classify the bound data workspace and return advisory workflow
-context. They require a session ID and a cwd within the project, reject other
+The entry events classify the bound data workspace and return advisory workflow
+context, including the session ID and any workflow declaration saved with
+`cv workflow-checkpoint`, restored after resume and compaction exactly as on
+Codex (the state lives in the same `.codex/resume-toolkit/sessions/` store).
+They require a session ID and a cwd within the project, reject other
 nested workspaces, and never derive a data path from prompt text. They do not
-persist answers, restore Codex checkpoints, authenticate independent review, or
-approve documents. Installed-runner tests establish routing, not native event
+persist answers, authenticate independent review, or approve documents. The
+`Stop` event holds the first end of a turn while the configured master profile
+misses an evidence claim ID, as on Codex. Installed-runner tests establish routing, not native event
 delivery; verify delivery in a fresh host session before claiming it.
 
 ## Hermes

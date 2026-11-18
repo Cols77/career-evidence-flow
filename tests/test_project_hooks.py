@@ -100,10 +100,13 @@ def test_hook_install_rejects_external_data_without_writing_project(project, tmp
 @pytest.mark.parametrize('event', ['SessionStart', 'UserPromptSubmit'])
 def test_claude_installed_runner_routes_project_with_no_profile_mutations(project, event):
     workspace = project / 'user-profile'
-    before = {p.relative_to(workspace): p.read_bytes() for p in workspace.rglob('*') if p.is_file()}
+    def records():  # session state under .codex/ is host state, not candidate records
+        return {p.relative_to(workspace): p.read_bytes() for p in workspace.rglob('*')
+                if p.is_file() and '.codex' not in p.relative_to(workspace).parts}
+    before = records()
     count = install_entry_hook(workspace, 'claude', project_root=project)
     config = json.loads((project / '.claude/settings.local.json').read_text())
-    assert set(config['hooks']) == {'SessionStart', 'UserPromptSubmit', 'Stop'}
+    assert set(config['hooks']) == {'SessionStart', 'UserPromptSubmit', 'PreCompact', 'Stop'}
     assert count > 1
     handler = config['hooks'][event][0]['hooks'][0]
     assert handler['args'][0] == '-I'
@@ -113,7 +116,7 @@ def test_claude_installed_runner_routes_project_with_no_profile_mutations(projec
     context = json.loads(proc.stdout)['hookSpecificOutput']['additionalContext']
     assert 'experience-capture' in context and str(workspace) in context
     assert 'advisory' in context and 'preview' in context
-    assert before == {p.relative_to(workspace): p.read_bytes() for p in workspace.rglob('*') if p.is_file()}
+    assert before == records()
 
 
 def test_claude_preserves_existing_settings_and_hooks(project):
@@ -195,16 +198,17 @@ def test_claude_same_root_default_remains_supported(tmp_path):
     assert 'experience-capture' in json.loads(result.stdout)['hookSpecificOutput']['additionalContext']
 
 
-def test_claude_stop_blocks_once_while_master_profile_lacks_a_claim(tmp_path, capsys):
+@pytest.mark.parametrize('host', ['claude', 'codex'])
+def test_stop_blocks_once_while_master_profile_lacks_a_claim(tmp_path, capsys, host):
     from cv_toolkit.cli import main
     project = tmp_path / 'project'
     project.mkdir()
     workspace = init_workspace(project / 'user-profile', example='showcase')
-    install_entry_hook(workspace, 'claude', project_root=project)
+    install_entry_hook(workspace, host, project_root=project)
     stop = payload(project, 'Stop')
 
     def hook(data=stop):
-        return json.loads(run_bundle(project, 'claude', workspace, data).stdout)
+        return json.loads(run_bundle(project, host, workspace, data).stdout)
 
     def missing():
         capsys.readouterr()
@@ -225,3 +229,30 @@ def test_claude_stop_blocks_once_while_master_profile_lacks_a_claim(tmp_path, ca
     assert hook({**stop, 'stop_hook_active': True}) == {}  # never loop a session
     master.write_text(master.read_text(encoding='utf-8') + f'See {ids[0]}.\n', encoding='utf-8')
     assert missing() == [] and hook() == {}
+
+
+def test_codex_stop_never_holds_an_interrupted_session(tmp_path):
+    project = tmp_path / 'project'
+    project.mkdir()
+    workspace = init_workspace(project / 'user-profile', example='showcase')
+    config = workspace / 'cvtool.toml'
+    config.write_text(config.read_text(encoding='utf-8').replace(
+        '[paths]\n', '[paths]\nmaster = "profile/master.md"\n'), encoding='utf-8')
+    stop = payload(project, 'Stop')
+    assert codex_hooks.dispatch(stop, workspace, project_root=project)['decision'] == 'block'
+    codex_hooks.dispatch(payload(project, 'Interrupt'), workspace, project_root=project)
+    assert codex_hooks.dispatch(stop, workspace, project_root=project) == {}
+
+
+def test_claude_restores_the_declared_checkpoint_after_compaction_for_that_session_only(project):
+    from cv_toolkit import claude_hooks
+    workspace = project / 'user-profile'
+    codex_hooks.record_checkpoint(workspace, 'synthetic.session', 'application-materials', 'waiting_for_user', [])
+    assert claude_hooks.dispatch(payload(project, 'PreCompact'), workspace, project) == {}
+    compact = {**payload(project), 'source': 'compact'}
+    context = claude_hooks.dispatch(compact, workspace, project)['hookSpecificOutput']['additionalContext']
+    assert 'application-materials' in context and 'waiting_for_user' in context
+    assert 'freshness: not_recorded' in context and 'synthetic.session' in context
+    other = claude_hooks.dispatch({**compact, 'session_id': 'other.session'}, workspace, project)
+    other = other['hookSpecificOutput']['additionalContext']
+    assert 'waiting_for_user' not in other and 'Saved workflow declaration' not in other

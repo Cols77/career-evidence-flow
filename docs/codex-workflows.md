@@ -27,7 +27,7 @@ Start a fresh **local** Codex session in the project. Check `codex features list
 | `UserPromptSubmit` | Reclassify, restore the declaration and observe new user direction; ignore prompt text. |
 | `PreCompact` | Atomically record the event; preserve the existing declaration. |
 | `Interrupt` | Record interruption; never restart the turn. |
-| `Stop` | Record the event; never block, force continuation or infer completion. |
+| `Stop` | Record the event. When `cvtool.toml` names `[paths] master` and that file misses an evidence claim ID, block the first stop with the missing IDs (as the Claude hook does); never when `stop_hook_active` is set or the session was interrupted. Never infers completion. |
 
 Restoration uses `SessionStart` with `source: compact`, whose output reaches the next model request. `PostCompact` does not document the additional-context contract used here, so it is not installed. Interrupt output cannot restart work. [Official event contracts](https://learn.chatgpt.com/docs/hooks).
 

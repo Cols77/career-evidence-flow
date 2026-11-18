@@ -32,38 +32,23 @@ const RESULT = {
   },
   required: ['angle', 'verdict', 'recorded', 'summary'],
 }
-const SKILL = { resume: 'resume-review', cover_letter: 'cover-letter-review' }
-// The readability reviewer must not know the evidence: insiders cannot see their own jargon.
-const COLD = 'You are a cold reader. Read ONLY the rendered resume artifact and the frozen job text in inputs/; ' +
-  'never open evidence, registry, sources, notes, projection or requirements. ' +
-  'For each summary sentence and bullet, restate in one plain sentence what was done and why it matters. Report terms you ' +
-  'cannot explain from general engineering knowledge or the JD, mechanism before outcome, several independent contributions ' +
-  'in one bullet, and bullets past two lines; medium when the core point is lost, low otherwise. Repairs replace or drop ' +
-  'insider terms, they never add explanations. Do not judge factual support. '
+// The reviewer briefs live in the toolkit (cv review-plan), so Claude Code and Codex review alike.
+const plan = (angle) => `${cv} review-plan --workspace '${workspace}' --bundle '${bundle}' --command "${cv}"` + (angle ? ` --angle ${angle}` : '')
 
 phase('Coverage')
 const coverage = await agent(
-  `${shell}Run exactly: ${status}\nReturn as todo every angle key (like "resume.factual") whose state is missing or stale. Run nothing else.`,
+  `${shell}Run exactly: ${plan()}\nReturn its todo list of angle keys (like "resume.factual") unchanged. Run nothing else.`,
   { phase: 'Coverage', schema: COVERAGE, model: 'haiku', effort: 'low' })
 const todo = coverage ? coverage.todo : []
 log(todo.length ? `${todo.length} angle(s) need a reviewer: ${todo.join(', ')}` : 'every required angle already has a current verdict')
 
 phase('Review')
-const results = await parallel(todo.map(key => () => {
-  const [document, angle] = key.split('.')
-  const findings = bundle.replace(/bundle\.json$/, `review-${document}-${angle}.md`)
-  return agent(
-    `You are an independent reviewer: you did not write these documents. Use the ${SKILL[document]} skill, ` +
-    `but review ONLY its "${angle}" angle for the ${document.replace('_', ' ')} of the revision ${bundle} ` +
-    `in the workspace ${workspace}. ` + (angle === 'readability' ? COLD :
-    `Read review-packet.md and the frozen inputs/ beside that bundle, and the exact rendered artifacts it lists`) + `${angle === 'visual' ? '; inspect every PDF page image with a visual tool, and if none is available your verdict is unavailable' : ''}.\n` +
-    `${shell}Then record your verdict yourself, once:\n` +
-    `- no concrete defect: ${cv} record-review --workspace '${workspace}' --bundle '${bundle}' --document ${document} --angle ${angle} --verdict pass --reviewer review-angles\n` +
-    `- defects: write them (affected unit, evidence reference, severity, narrow repair) to ${findings} under the workspace, then the same command with --verdict findings --findings '${findings}'\n` +
-    `- you could not review this angle (missing input or tool): the same command with --verdict unavailable, and say why in summary.\n` +
-    `Never edit the documents, the evidence or the bundle. Never claim approval.`,
-    { phase: 'Review', label: `review:${key}`, schema: RESULT, model })
-}))
+const results = await parallel(todo.map(key => () => agent(
+  `${shell}Run exactly: ${plan(key)}\n` +
+  `It prints JSON; briefs["${key}"] is your complete task. Follow that brief exactly, as an independent reviewer ` +
+  `of the ${key} angle only, and record your verdict once as it says. Return the angle key, your verdict, whether ` +
+  `the record-review command succeeded, and a one-line summary.`,
+  { phase: 'Review', label: `review:${key}`, schema: RESULT, model })))
 const done = results.filter(Boolean)
 if (done.length < todo.length) log(`${todo.length - done.length} reviewer(s) returned nothing; their angles stay unrecorded`)
 

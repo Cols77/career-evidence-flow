@@ -18,8 +18,10 @@ import time
 import uuid
 
 from .onboarding import STATE_TO_SKILL, classify
+from .evidence import build_source_registry, load_evidence, master_missing
 from .hook_scope import bound_workspace, in_scope
 from .records import ToolkitError, _decode, atomic_write_json, confined, load_json, object_fields
+from .workspace import Workspace
 
 SKILLS = ('experience-capture', 'application-materials', 'resume-review', 'cover-letter-review', 'job-search')
 PHASES = ('working', 'waiting_for_user', 'blocked', 'paused', 'finished')
@@ -235,6 +237,17 @@ def _context(route, state, session, workspace, project):
             f'Use explicit data workspace {workspace} for cv commands and canonical records. '
             f'Load skills and references from {project / ".agents/skills"}. '
             + route.as_context()['context'])
+    text += declaration(route, state)
+    text += ('For review, use actual independent agents and visual tools on the exact rendered artifacts; '
+             'report missing capabilities. Recheck all selected inputs and outputs with cv workflow-status before final claims/export. '
+             'A declaration or fresh hash does not prove independent review, visual inspection, completeness, or approval. '
+             'All artifacts remain previews; no guarded release exists.')
+    return text
+
+
+def declaration(route, state):
+    """The saved workflow declaration as advisory context, shared by the Codex and Claude hooks."""
+    text = ''
     checkpoint = state['checkpoint']
     if checkpoint:
         text += (f" Saved workflow declaration: {checkpoint['skill']}; phase {checkpoint['phase']}. "
@@ -246,11 +259,45 @@ def _context(route, state, session, workspace, project):
                      'A changed user request takes precedence over the saved workflow. ')
     if state['interrupted']:
         text += 'The session was interrupted; respect the interruption and await explicit user direction. '
-    text += ('For review, use actual independent agents and visual tools on the exact rendered artifacts; '
-             'report missing capabilities. Recheck all selected inputs and outputs with cv workflow-status before final claims/export. '
-             'A declaration or fresh hash does not prove independent review, visual inspection, completeness, or approval. '
-             'All artifacts remain previews; no guarded release exists.')
     return text
+
+
+def master_stop(payload, root):
+    """Hold the first stop while the configured master profile lacks an evidence claim ID."""
+    workspace = Workspace.load(root)
+    # stop_hook_active: the host is already continuing because of a stop hook; blocking again could loop forever.
+    if payload.get('stop_hook_active') or workspace.master_path is None:
+        return {}
+    registry = build_source_registry(load_json(workspace.profile_dir / 'registry.json'))
+    missing = master_missing(load_evidence(workspace.profile_dir / 'evidence.json', registry), workspace.master_path)
+    if not missing:
+        return {}
+    shown = ', '.join(missing[:20]) + (f' and {len(missing) - 20} more' if len(missing) > 20 else '')
+    return {'decision': 'block', 'reason': (
+        f'Resume Toolkit: the master profile {workspace.master_path.relative_to(workspace.root).as_posix()} '
+        f'does not name {len(missing)} evidence claim(s): {shown}. Add a dated section naming each claim ID '
+        'and its sources, then confirm with cv validate-evidence that master_missing is empty. '
+        'This check approves nothing.')}
+
+
+def observe(payload, root):
+    """Record one lifecycle event in the session state; return the route (entry events only) and state."""
+    session, event = payload.get('session_id'), payload['hook_event_name']
+    path = _state_path(root, session)
+    route = classify(root) if event in ('SessionStart', 'UserPromptSubmit') else None
+    with _locked(path):
+        state = _load(root, session, path)
+        if route is not None:
+            state['route'] = route.state
+        if event == 'Interrupt':
+            state['interrupted'] = True
+        elif event == 'UserPromptSubmit':
+            # New direction. A master-stop continuation also arrives here; the stop
+            # check never blocks an interrupted session, so none is lost.
+            state['interrupted'] = False
+        state['last_event'] = event
+        atomic_write_json(path, state)
+    return route, state
 
 
 def dispatch(payload, workspace, *, project_root=None, _trace=None):
@@ -269,20 +316,11 @@ def dispatch(payload, workspace, *, project_root=None, _trace=None):
         return {}
     try:
         event = payload['hook_event_name']
-        path = _state_path(root, session)
-        route = classify(root) if event in ('SessionStart', 'UserPromptSubmit') else None
-        with _locked(path):
-            state = _load(root, session, path)
-            if route is not None:
-                state['route'] = route.state
-            if event == 'Interrupt':
-                state['interrupted'] = True
-            elif event == 'UserPromptSubmit':
-                # New user direction, not a hook-generated continuation: we
-                # never emit Stop block decisions that create such prompts.
-                state['interrupted'] = False
-            state['last_event'] = event
-            atomic_write_json(path, state)
+        route, state = observe(payload, root)
+        if event == 'Stop' and not state['interrupted']:
+            held = master_stop(payload, root)
+            trace.update(outcome='stop_held' if held else 'observed', route=state['route'])
+            return held
         if route is not None:
             status = checkpoint_status(root, session)
             trace.update(outcome='context_emitted', route=route.state, freshness=status['freshness'])

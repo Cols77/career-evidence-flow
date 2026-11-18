@@ -268,5 +268,18 @@ def test_claude_install_made_before_the_stop_check_upgrades_in_place(installer, 
     config = project / '.claude/settings.local.json'
     assert set(json.loads(config.read_text())['hooks']) == {'SessionStart', 'UserPromptSubmit'}
     assert install(installer, project, host='claude')['hooks'] == 'updated'
-    assert set(json.loads(config.read_text())['hooks']) == {'SessionStart', 'UserPromptSubmit', 'Stop'}
+    assert {'SessionStart', 'UserPromptSubmit', 'Stop'} <= set(json.loads(config.read_text())['hooks'])
+    assert install(installer, project, host='claude')['hooks'] == 'unchanged'
+
+
+def test_claude_install_made_before_checkpoint_restore_gains_precompact(installer, project, monkeypatch):
+    from cv_toolkit import claude_hooks
+    with monkeypatch.context() as older:
+        older.setattr(claude_hooks, 'EVENTS', ('SessionStart', 'UserPromptSubmit', 'Stop'))
+        install(installer, project, host='claude', hooks=True)
+    config = project / '.claude/settings.local.json'
+    assert 'PreCompact' not in json.loads(config.read_text())['hooks']
+    assert install(installer, project, host='claude')['hooks'] == 'updated'
+    assert set(json.loads(config.read_text())['hooks']) == {'SessionStart', 'UserPromptSubmit', 'PreCompact', 'Stop'}
+    assert (project / '.claude/hooks/resume-toolkit/cv_toolkit/codex_hooks.py').is_file()
     assert install(installer, project, host='claude')['hooks'] == 'unchanged'
