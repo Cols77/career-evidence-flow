@@ -51,6 +51,7 @@ def test_regenerate_builds_the_next_revision_from_the_edits(application, capsys)
     copy.write_text(edited, encoding='utf-8')
     code, result = regenerate(capsys, root)
     assert code == 0 and result['bundle'] == 'outputs/example/r02/bundle.json'
+    assert 'cv review-plan' in result['next'] and 'r02/bundle.json' in result['next']
     r02 = root / 'outputs/example/r02'
     assert (app / 'resume.md').read_text(encoding='utf-8') == edited
     assert (r02 / 'resume.md').read_text(encoding='utf-8') == edited

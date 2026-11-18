@@ -1,6 +1,6 @@
 ---
 name: application-materials
-description: Use when a supplied job description needs a tailored resume and cover letter, an existing application needs revision, or an agent must continue an interview-to-draft-to-review workflow.
+description: Use when a supplied job description needs a tailored resume and cover letter, an existing application needs revision, the owner edited a release's resume.md or cover-letter.md and asks to regenerate it, or an agent must continue an interview-to-draft-to-review workflow.
 ---
 
 # Application materials
@@ -17,6 +17,18 @@ Checkpointing `bundle.json` alone does not check its dependencies; always run
 `verify-bundle` too. Without hook metadata, these commands still work, but hook
 restoration remains unverified.
 
+## When the owner edited a release
+
+The owner may edit the `resume.md` or `cover-letter.md` at the top of a revision folder and ask you to regenerate. Do all of these steps, in order; details are in [owner edits of a release](references/drafting-workflow.md#owner-edits-of-a-release).
+
+1. Run `cv regenerate --workspace ROOT --from outputs/SLUG/rNN --diff` and read every changed hunk.
+2. A rewrite is the owner's text: keep it word for word. Never revert, drop or soften it on your own, even when it looks unsupported.
+3. A note (an instruction to you, in any form) is carried out in the document, then removed.
+4. A rewrite or note that adds a fact absent from the evidence (a metric, technology, date, scope or result) is a material question: stop and ask the owner before building. Record the answer in canonical evidence with provenance and in the master profile. Only if the owner says it is wrong may the text change.
+5. Write the result into the same top-level copies, then run `cv regenerate --workspace ROOT --from outputs/SLUG/rNN`.
+6. Review the new revision in full, exactly as step 7 below: page balance, every review angle (`review-angles` on Claude Code, `cv review-plan` subagents on Codex), repairs of findings including in the owner's text, and `cv review-status` before you reply. Regenerating without this review is not finished.
+7. Report what changed in the owner's wording and why.
+
 Own the application workflow as the host agent: understand the JD, reuse evidence, ask material questions, draft both documents and obtain independent review. Python supplies reliable local operations. Read [application records](references/application-records.md) and [the drafting workflow](references/drafting-workflow.md).
 
 1. Find the explicit private workspace. Read the local `RESUME_TOOLKIT.md` and project binding when present; the project root can differ from the data workspace (for example ignored `user-profile/`). Use its pinned interpreter and pass the data root explicitly to every command. Never select an employer folder or a synthetic example as the master profile. Read actual evidence/registry, prior answers, projection and employer instructions. Empty intake goes through `experience-capture`; synthetic examples stay in a separate test workspace.
@@ -31,7 +43,6 @@ On Codex and Claude Code, use the hook context's actual session ID with `cv work
 
 Before dispatching reviewers, add repeated `--file RELATIVE_PATH` arguments to snapshot the complete packet: configuration, evidence/registry/projection, answers, frozen JD/requirements, strengthening assessment and dispositions, effective policy, both sources, relevant style inputs and every exact rendered artifact. Each checkpoint replaces the previous selected-file snapshot; preserve the full selection. Keep actual delegation/run references, inspected pages and findings in private notes. Run `workflow-status` before final claims or copying outputs. `stale` requires affected real reviews on repaired/rerendered bytes before deliberately replacing the snapshot; `not_recorded` supplies no freshness evidence. Compare exported copies with the reviewed bytes. A fresh selected-file snapshot cannot establish packet completeness, reviewer identity or visual inspection, and does not guard export or approve submission.
 
-When the owner says they edited a release (its top-level `resume.md` or `cover-letter.md`) and asks to regenerate, follow [owner edits of a release](references/drafting-workflow.md#owner-edits-of-a-release): read `cv regenerate --workspace ROOT --from outputs/SLUG/rNN --diff`, keep every rewrite, carry out every note and remove it, ask about and record any new fact before use, then run `cv regenerate` without `--diff` and continue from step 7 on the new revision.
 
 Include actual source and answer files reached through support references, even when they belong to older applications; registry declarations and evidence summaries do not replace those bytes. Without lifecycle metadata, manually record the complete packet's hashes and actual review observations, and explicitly report hook restoration/checkpoint orchestration as unverified. Never infer native execution from installed hooks, earlier sessions or a successful file installation.
 

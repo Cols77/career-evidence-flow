@@ -388,7 +388,9 @@ def regenerate(workspace, revision, *, diff=False):
     result = build_application(workspace, context['application'], output,
                                output_format='both' if any(d.endswith('.pdf') for d in record['documents']) else 'html',
                                styles=styles, includes=includes, page_images=record['page_images'])
-    return {**result, 'from': _relative(workspace, folder)}
+    # The build only checks; the host still owes the full review of the new revision.
+    return {**result, 'from': _relative(workspace, folder),
+            'next': f"review every angle: cv review-plan --workspace ROOT --bundle {result['bundle']}"}
 
 
 def _brief(workspace, bundle, document, angle, command):

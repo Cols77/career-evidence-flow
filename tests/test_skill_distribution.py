@@ -74,6 +74,9 @@ def test_application_materials_turns_owner_release_edits_into_a_reviewed_revisio
     entry = (skills / 'SKILL.md').read_text(encoding='utf-8')
     steps = (skills / 'references/drafting-workflow.md').read_text(encoding='utf-8')
     assert 'owner-edits-of-a-release' in entry and 'cv regenerate' in entry
+    for step in ('keep it word for word', 'stop and ask the owner before building', 'Regenerating without this review is not finished'):
+        assert step in entry, step
+    assert 'asks to regenerate it' in entry.split('---')[1]
     section = steps[steps.index('## Owner edits of a release'):]
     for step in ('--diff', 'keep it as written', 'carried out in the document and then removed',
                  'ask the owner, persist the answer', 'the full review pipeline', "the owner's text included"):
