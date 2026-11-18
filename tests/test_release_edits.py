@@ -81,12 +81,12 @@ def test_regenerate_overwrites_a_source_changed_after_the_revision(application, 
 def test_review_plan_lists_only_angles_without_a_current_verdict(application, capsys):
     root, _ = application
     assert build(capsys, root)[0] == 0
-    for angle in ('factual', 'alignment', 'voice', 'readability', 'visual'):
+    from cv_toolkit.application_tools import ANGLES
+    for angle in ANGLES['resume']:
         assert invoke(capsys, root, 'record-review', '--bundle', R01 + '/bundle.json', '--document', 'resume',
                       '--angle', angle, '--verdict', 'pass')[0] == 0
     code, plan = invoke(capsys, root, 'review-plan', '--bundle', R01 + '/bundle.json')
-    assert code == 0 and plan['todo'] == ['cover_letter.' + a for a in
-                                          ('factual', 'persuasiveness', 'motivation', 'voice', 'visual')]
+    assert code == 0 and plan['todo'] == ['cover_letter.' + a for a in ANGLES['cover_letter']]
     assert set(plan['briefs']) == set(plan['todo'])
     assert 'record-review' in plan['briefs']['cover_letter.voice']
 
